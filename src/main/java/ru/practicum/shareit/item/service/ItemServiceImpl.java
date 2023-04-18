@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.item.exception.OwnerNotFoundException;
 import ru.practicum.shareit.item.model.Item;
@@ -14,10 +15,11 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class ItemServiceImpl implements ItemService {
 
-    public static final String OWNER_NOT_FOUND_MESSAGE = "Not found user. id: ";
-    public static final int MIN_SEARCH_REQUEST_LENGTH = 3;
+    private static final String OWNER_NOT_FOUND_MESSAGE = "Not found user. id: ";
+    private static final int MIN_SEARCH_REQUEST_LENGTH = 3;
 
     private final ItemDao itemDao;
     private final UserDao userDao;
@@ -28,21 +30,25 @@ public class ItemServiceImpl implements ItemService {
         if (!ownerExists) {
             throw new OwnerNotFoundException(OWNER_NOT_FOUND_MESSAGE + item.getOwner());
         }
+        log.info("Creat new item: {}", item.getName());
         return itemDao.createItem(item);
     }
 
     @Override
     public Item updateItem(Item item) {
+        log.info("Update item: {}", item.getName());
         return itemDao.updateItem(item);
     }
 
     @Override
     public Item findItemById(Long itemId) {
+        log.info("Find item by id: {}", itemId);
         return itemDao.findItemById(itemId);
     }
 
     @Override
     public List<Item> findAllItems(Long userId) {
+        log.info("Find all items by user id: {}", userId);
         return itemDao.findAllItems(userId);
     }
 
@@ -51,6 +57,7 @@ public class ItemServiceImpl implements ItemService {
         if (text == null || text.isBlank() || text.length() <= MIN_SEARCH_REQUEST_LENGTH) {
             return new ArrayList<>();
         }
+        log.info("Find items by request: {}", text);
         return itemDao.findItemsByRequest(text);
     }
 

@@ -19,13 +19,13 @@ import java.util.List;
 @RequestMapping(path = "/items")
 public class ItemController {
 
-    public static final int MIN_ID_VALUE = 1;
-    public static final String USER_ID_HEADER = "X-Sharer-User-Id";
-    public static final String NULL_ITEM_ID_MESSAGE = "itemID is null";
-    public static final String NULL_USER_ID_MESSAGE = "userID is null";
+    private static final int MIN_ID_VALUE = 1;
+    private static final String USER_ID_HEADER = "X-Sharer-User-Id";
+    private static final String NULL_ITEM_ID_MESSAGE = "itemID is null";
+    private static final String NULL_USER_ID_MESSAGE = "userID is null";
 
     private final ItemService itemService;
-    private final ItemMapper mapper;
+    private final ItemMapper itemMapper;
 
     @PostMapping
     public ItemDto createItem(@Validated({Create.class})
@@ -33,8 +33,8 @@ public class ItemController {
                               @NotNull(message = (NULL_ITEM_ID_MESSAGE))
                               @Min(MIN_ID_VALUE)
                               @RequestHeader(USER_ID_HEADER) Long userId) {
-        Item item = mapper.toModel(itemDto, userId);
-        return mapper.toDto(itemService.createItem(item));
+        Item item = itemMapper.toModel(itemDto, userId);
+        return itemMapper.toDto(itemService.createItem(item));
     }
 
     @PatchMapping("/{itemId}")
@@ -46,16 +46,16 @@ public class ItemController {
                               @NotNull(message = NULL_USER_ID_MESSAGE)
                               @Min(MIN_ID_VALUE)
                               @RequestHeader(USER_ID_HEADER) Long userId) {
-        Item item = mapper.toModel(itemDto, userId);
+        Item item = itemMapper.toModel(itemDto, userId);
         item.setId(itemId);
-        return mapper.toDto(itemService.updateItem(item));
+        return itemMapper.toDto(itemService.updateItem(item));
     }
 
     @GetMapping("/{itemId}")
     public ItemDto findItemById(@NotNull(message = NULL_ITEM_ID_MESSAGE)
                                 @Min(MIN_ID_VALUE)
                                 @PathVariable Long itemId) {
-        return mapper.toDto(itemService.findItemById(itemId));
+        return itemMapper.toDto(itemService.findItemById(itemId));
     }
 
     @GetMapping
@@ -63,12 +63,12 @@ public class ItemController {
                                       @Min(MIN_ID_VALUE)
                                       @RequestHeader(USER_ID_HEADER) Long userId) {
         List<Item> userItems = itemService.findAllItems(userId);
-        return mapper.mapItemListToItemDtoList(userItems);
+        return itemMapper.mapItemListToItemDtoList(userItems);
     }
 
     @GetMapping("/search")
     public List<ItemDto> findItemsByRequest(@RequestParam String text) {
         List<Item> foundItems = itemService.findItemsByRequest(text);
-        return mapper.mapItemListToItemDtoList(foundItems);
+        return itemMapper.mapItemListToItemDtoList(foundItems);
     }
 }

@@ -13,8 +13,8 @@ import java.util.Map;
 @Repository
 public class InMemoryItemDaoImpl implements ItemDao {
 
-    public static final String ITEM_NOT_FOUND_MESSAGE = "Item not found. id: ";
-    public static final String DENIED_ACCESS_MESSAGE = "The user is not the owner of the thing";
+    private static final String ITEM_NOT_FOUND_MESSAGE = "Item not found. id: ";
+    private static final String DENIED_ACCESS_MESSAGE = "The user is not the owner of the thing";
 
     private final Map<Long, Item> items = new HashMap<>();
     private long currentId = 1;

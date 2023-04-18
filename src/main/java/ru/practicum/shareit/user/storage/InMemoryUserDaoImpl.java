@@ -14,8 +14,8 @@ import java.util.ArrayList;
 
 @Repository
 public class InMemoryUserDaoImpl implements UserDao {
-    public static final String USER_NOT_FOUND_MESSAGE = "User not found. id: ";
-    public static final String EMAIL_CONFLICT_MESSAGE = "email is already in use by another user: ";
+    private static final String USER_NOT_FOUND_MESSAGE = "User not found. id: ";
+    private static final String EMAIL_CONFLICT_MESSAGE = "email is already in use by another user: ";
 
     private final Map<Long, User> users = new HashMap<>();
     private final Set<String> emails = new HashSet<>();
