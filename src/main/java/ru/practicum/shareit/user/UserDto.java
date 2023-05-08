@@ -17,15 +17,16 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @Builder
 public class UserDto {
-
+    private static final int MAX_NAME_LENGTH = 100;
+    private static final int MAX_EMAIL_LENGTH = 255;
     private long id;
 
     @NotBlank(groups = {OnCreate.class})
-    @Size(max = 100, groups = {OnCreate.class, OnUpdate.class})
+    @Size(max = MAX_NAME_LENGTH, groups = {OnCreate.class, OnUpdate.class})
     private String name;
 
     @NotEmpty(groups = {OnCreate.class})
     @Email(groups = {OnCreate.class, OnUpdate.class})
-    @Size(max = 255, groups = {OnCreate.class, OnUpdate.class})
+    @Size(max = MAX_EMAIL_LENGTH, groups = {OnCreate.class, OnUpdate.class})
     private String email;
 }

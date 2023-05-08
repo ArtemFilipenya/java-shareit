@@ -9,8 +9,8 @@ import ru.practicum.shareit.exception.OnUpdate;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDtoRequest;
 import ru.practicum.shareit.item.dto.ItemDtoResponse;
-import ru.practicum.shareit.item.CommentService;
-import ru.practicum.shareit.item.ItemService;
+import ru.practicum.shareit.item.service.CommentService;
+import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
 import java.util.List;

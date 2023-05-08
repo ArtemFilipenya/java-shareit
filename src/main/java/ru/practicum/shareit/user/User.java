@@ -14,16 +14,19 @@ import java.util.Objects;
 @Entity
 @Table(name = "users", schema = "public")
 public class User {
+    private static final String USER_ID = "user_id";
+    private static final String USER_NAME = "user_name";
+    private static final String EMAIL = "email";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id", nullable = false)
+    @Column(name = USER_ID, nullable = false)
     private long id;
 
-    @Column(name = "user_name", nullable = false)
+    @Column(name = USER_NAME, nullable = false)
     private String name;
 
-    @Column(name = "email", unique = true, nullable = false)
+    @Column(name = EMAIL, unique = true, nullable = false)
     private String email;
 
     @Override
