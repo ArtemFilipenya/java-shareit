@@ -1,32 +1,27 @@
 package ru.practicum.shareit.user;
 
 import lombok.experimental.UtilityClass;
-import ru.practicum.shareit.user.UserDto;
-import ru.practicum.shareit.user.User;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @UtilityClass
 public class UserMapper {
-
-    public static UserDto toUserDto(User user) {
-        return UserDto.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .build();
+    public static User convertFromDtoToUser(UserDto userDto) {
+        return new User(userDto.getId(), userDto.getName(), userDto.getEmail());
     }
 
-    public static User fromUserDto(UserDto userDto) {
-        return User.builder()
-                .id(userDto.getId())
-                .name(userDto.getName())
-                .email(userDto.getEmail())
-                .build();
+    public static UserDto convertFromUserToDto(User user) {
+        return new UserDto(user.getId(), user.getName(), user.getEmail());
     }
 
-    public static List<UserDto> toUserDtoList(List<User> users) {
-        return users.stream().map(UserMapper::toUserDto).collect(Collectors.toList());
+    public static List<UserDto> convertUsersToDtoList(List<User> users) {
+        List<UserDto> userDtos = new ArrayList<>();
+
+        for (User user : users) {
+            userDtos.add(convertFromUserToDto(user));
+        }
+        return userDtos;
     }
+
 }

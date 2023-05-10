@@ -9,12 +9,12 @@ import java.lang.annotation.Target;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+@Documented
 @Target(ElementType.TYPE_USE)
 @Retention(RUNTIME)
-@Documented
 @Constraint(validatedBy = DateValidator.class)
 public @interface EndAfterStartValidation {
-    String message() default "End time cannot be before start time.";
+    String message() default "Time validation error";
 
     Class<?>[] groups() default {};
 

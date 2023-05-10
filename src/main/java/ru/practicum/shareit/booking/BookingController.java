@@ -2,13 +2,15 @@ package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDtoRequest;
 import ru.practicum.shareit.booking.dto.BookingDtoResponse;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.exception.OnCreate;
+import ru.practicum.shareit.validation_markers.Create;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -16,44 +18,46 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class BookingController {
-
+    private static final String DEFAULT_STATE = "ALL";
+    private static final String HEADER = "X-Sharer-User-Id";
     private final BookingService bookingService;
 
+    @Autowired
+    private HttpServletRequest request;
+
+    @GetMapping("/{bookingId}")
+    public BookingDtoResponse findById(@PathVariable long bookingId) {
+        long userId = Long.parseLong(request.getHeader(HEADER));
+        log.info("BookingController.findById() id={}", bookingId);
+        return bookingService.findById(bookingId, userId);
+    }
+
+    @GetMapping("/owner")
+    public List<BookingDtoResponse> findByOwner(@RequestParam(defaultValue = DEFAULT_STATE) String state) {
+        long userId = Long.parseLong(request.getHeader(HEADER));
+        log.info("BookingController.findByOwner() userId ={}", userId);
+        return bookingService.findByOwner(userId, state);
+    }
+
+    @GetMapping
+    public List<BookingDtoResponse> findByBooker(@RequestParam(defaultValue = DEFAULT_STATE) String state) {
+        long userId = Long.parseLong(request.getHeader(HEADER));
+        log.info("BookingController.findByBooker() userId={}", userId);
+        return bookingService.findByBooker(userId, state);
+    }
+
     @PostMapping()
-    public BookingDtoResponse create(@Validated(OnCreate.class) @RequestBody BookingDtoRequest bookingDtoRequest,
-                                     @RequestHeader("X-Sharer-User-Id") long userId) {
-        log.info("Received POST request for new Booking for Item ID = {}", bookingDtoRequest.getItemId());
+    public BookingDtoResponse create(@Validated(Create.class) @RequestBody BookingDtoRequest bookingDtoRequest) {
+        long userId = Long.parseLong(request.getHeader(HEADER));
+        log.info("BookingController.create() id={}", bookingDtoRequest.getItemId());
         return bookingService.create(bookingDtoRequest, userId);
     }
 
     @PatchMapping("/{bookingId}")
     public BookingDtoResponse approve(@PathVariable long bookingId,
-                                      @RequestHeader("X-Sharer-User-Id") long userId,
                                       @RequestParam boolean approved) {
-        log.info("Received PATCH request for Booking ID = {}", bookingId);
+        long userId = Long.parseLong(request.getHeader(HEADER));
+        log.info("BookingController.approve() bookingId={}", bookingId);
         return bookingService.approve(bookingId, userId, approved);
-    }
-
-    @GetMapping("/{bookingId}")
-    public BookingDtoResponse findById(@PathVariable long bookingId,
-                                       @RequestHeader("X-Sharer-User-Id") long userId) {
-        log.info("Received GET request for Booking ID = {}", bookingId);
-        return bookingService.findById(bookingId, userId);
-    }
-
-    @GetMapping
-    public List<BookingDtoResponse> findByBooker(
-            @RequestParam(defaultValue = "ALL") String state,
-            @RequestHeader("X-Sharer-User-Id") long userId) {
-        log.info("Received GET request for Bookings of Booker ID = {}", userId);
-        return bookingService.findByBooker(userId, state);
-    }
-
-    @GetMapping("/owner")
-    public List<BookingDtoResponse> findByOwner(
-            @RequestParam(defaultValue = "ALL") String state,
-            @RequestHeader("X-Sharer-User-Id") long userId) {
-        log.info("Received GET request for Bookings of Owner ID = {}", userId);
-        return bookingService.findByOwner(userId, state);
     }
 }

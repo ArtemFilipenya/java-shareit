@@ -1,17 +1,17 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.UserDto;
 import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.UserDto;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.util.List;
 
-import static ru.practicum.shareit.user.UserMapper.fromUserDto;
-import static ru.practicum.shareit.user.UserMapper.toUserDto;
+import static ru.practicum.shareit.user.UserMapper.convertFromDtoToUser;
+import static ru.practicum.shareit.user.UserMapper.convertFromUserToDto;
 
 @Service
 @RequiredArgsConstructor
@@ -22,34 +22,34 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto create(UserDto userDto) {
-        User user = userRepository.save(fromUserDto(userDto));
-        return toUserDto(user);
+        return convertFromUserToDto(userRepository.save(convertFromDtoToUser(userDto)));
     }
 
     @Override
     @Transactional
     public UserDto update(long userId, UserDto userDto) {
         User foundedUser = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User ID = " + userId + " not found."));
-        if (userDto.getEmail() != null && !userDto.getEmail().isBlank()) {
-            foundedUser.setEmail(userDto.getEmail());
-        }
+                .orElseThrow(() -> new NotFoundException(String.format("User with id= %s not found", userId)));
+
         if (userDto.getName() != null && !userDto.getName().isBlank()) {
             foundedUser.setName(userDto.getName());
         }
-        return toUserDto(foundedUser);
+        if (userDto.getEmail() != null && !userDto.getEmail().isBlank()) {
+            foundedUser.setEmail(userDto.getEmail());
+        }
+        return convertFromUserToDto(foundedUser);
     }
 
     @Override
     @Transactional(readOnly = true)
     public User getById(long id) {
         return userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User ID = " + id + " not found."));
+                .orElseThrow(() -> new NotFoundException(String.format("User with id= %s not found", id)));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<User> getAll() {
+    public List<User> findAll() {
         return userRepository.findAll();
     }
 
@@ -57,11 +57,5 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteById(long id) {
         userRepository.deleteById(id);
-    }
-
-    @Override
-    @Transactional
-    public void deleteAll() {
-        userRepository.deleteAll();
     }
 }

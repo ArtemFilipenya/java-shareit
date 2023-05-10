@@ -3,9 +3,6 @@ package ru.practicum.shareit.item.service;
 import ru.practicum.shareit.item.dto.ItemDtoRequest;
 import ru.practicum.shareit.item.dto.ItemDtoResponse;
 
-import ru.practicum.shareit.item.dto.ItemDtoRequest;
-import ru.practicum.shareit.item.dto.ItemDtoResponse;
-
 import java.util.List;
 
 public interface ItemService {
@@ -15,7 +12,7 @@ public interface ItemService {
 
     ItemDtoResponse getById(long userId, long itemId);
 
-    List<ItemDtoResponse> getAll(long userId);
+    List<ItemDtoResponse> findAll(long userId);
 
     void deleteById(long userId, long itemId);
 

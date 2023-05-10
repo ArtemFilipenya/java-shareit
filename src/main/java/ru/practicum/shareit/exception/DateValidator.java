@@ -12,12 +12,8 @@ public class DateValidator implements ConstraintValidator<EndAfterStartValidatio
     }
 
     @Override
-    public boolean isValid(BookingDtoRequest bookingDto, ConstraintValidatorContext constraintValidatorContext) {
-        LocalDateTime start = bookingDto.getStart();
-        LocalDateTime end = bookingDto.getEnd();
-        if (start == null || end == null) {
-            return false;
-        }
-        return end.isAfter(start);
+    public boolean isValid(BookingDtoRequest bookingDto, ConstraintValidatorContext context) {
+        return bookingDto.getStart() != null && bookingDto.getEnd() != null &&
+                bookingDto.getEnd().isAfter(bookingDto.getStart());
     }
 }

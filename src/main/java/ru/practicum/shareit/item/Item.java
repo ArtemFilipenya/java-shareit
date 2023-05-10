@@ -15,23 +15,25 @@ import java.util.Objects;
 @Entity
 @Table(name = "items", schema = "public")
 public class Item {
+    private static final String ITEM_ID = "item_id";
+    private static final String ITEM_NAME = "item_name";
+    private static final String DESCRIPTION = "description";
+    private static final String AVAILABLE = "available";
+    private static final String OWNER_ID = "owner_id";
+    private static final int MAX_NAME_LENGTH = 100;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "item_id", nullable = false)
+    @Column(name = ITEM_ID, nullable = false)
     private long id;
-
-    @Column(name = "item_name", length = 100, nullable = false)
+    @Column(name = ITEM_NAME, length = MAX_NAME_LENGTH, nullable = false)
     private String name;
-
-    @Column(name = "description", nullable = false)
+    @Column(name = DESCRIPTION, nullable = false)
     private String description;
-
-    @Column(name = "available", nullable = false)
+    @Column(name = AVAILABLE, nullable = false)
     private Boolean available;
-
     @ManyToOne
-    @JoinColumn(name = "owner_id")
+    @JoinColumn(name = OWNER_ID)
     @ToString.Exclude
     private User owner;
 

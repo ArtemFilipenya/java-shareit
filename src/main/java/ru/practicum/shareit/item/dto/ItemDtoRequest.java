@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import ru.practicum.shareit.exception.OnCreate;
-import ru.practicum.shareit.exception.OnUpdate;
+import ru.practicum.shareit.validation_markers.Create;
+import ru.practicum.shareit.validation_markers.Update;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -16,17 +16,16 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 @Builder
 public class ItemDtoRequest {
-
+    private static final int MAX_NAME_LENGTH = 100;
+    private static final int MAX_DESCRIPTION_LENGTH = 255;
     private long id;
 
-    @NotBlank(groups = OnCreate.class)
-    @Size(max = 100, groups = {OnCreate.class, OnUpdate.class})
+    @NotBlank(groups = Create.class)
+    @Size(max = MAX_NAME_LENGTH, groups = {Create.class, Update.class})
     private String name;
-
-    @NotBlank(groups = OnCreate.class)
-    @Size(max = 255, groups = {OnCreate.class, OnUpdate.class})
-    private String description;
-
-    @NotNull(groups = OnCreate.class)
+    @NotNull(groups = Create.class)
     private Boolean available;
+    @NotBlank(groups = Create.class)
+    @Size(max = MAX_DESCRIPTION_LENGTH, groups = {Create.class, Update.class})
+    private String description;
 }

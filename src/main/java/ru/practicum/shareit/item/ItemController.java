@@ -2,17 +2,20 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.exception.OnCreate;
-import ru.practicum.shareit.exception.OnUpdate;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDtoRequest;
 import ru.practicum.shareit.item.dto.ItemDtoResponse;
 import ru.practicum.shareit.item.service.CommentService;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.validation_markers.Create;
+import ru.practicum.shareit.validation_markers.Update;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -20,56 +23,60 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class ItemController {
+    private static final String HEADER = "X-Sharer-User-Id";
 
     private final ItemService itemService;
     private final CommentService commentService;
 
-    @PostMapping
-    public ItemDtoResponse create(@RequestHeader("X-Sharer-User-Id") long userId,
-                                  @Validated(OnCreate.class) @RequestBody ItemDtoRequest itemDtoRequest) {
-        log.info("Received POST request for new Item of User ID = {}", userId);
-        return itemService.create(userId, itemDtoRequest);
-    }
-
-    @PatchMapping("/{id}")
-    public ItemDtoResponse update(@RequestHeader("X-Sharer-User-Id") long userId,
-                                  @PathVariable long id, @Validated(OnUpdate.class) @RequestBody ItemDtoRequest itemDtoRequest) {
-        log.info("Received PATCH request for Item ID = {} of User ID = {}", id, userId);
-        return itemService.update(userId, id, itemDtoRequest);
-    }
-
-    @GetMapping
-    public List<ItemDtoResponse> getAll(@RequestHeader("X-Sharer-User-Id") long userId) {
-        log.info("Received GET request for all Items of User ID = {}", userId);
-        return itemService.getAll(userId);
-    }
+    @Autowired
+    private HttpServletRequest request;
 
     @GetMapping("/{id}")
-    public ItemDtoResponse getById(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long id) {
-        log.info("Received GET request for Item ID = {} of User ID = {}", id, userId);
+    public ItemDtoResponse getItemById(@PathVariable long id) {
+        long userId = Long.parseLong(request.getHeader(HEADER));
+        log.info("ItemController.getItemById() itemId={} userId={}", id, userId);
         return itemService.getById(userId, id);
-    }
-
-    @DeleteMapping("/{id}")
-    public void deleteById(@RequestHeader("X-Sharer-User-Id") long userId, @PathVariable long id) {
-        log.info("Received DELETE request for Item ID = {} of User ID = {}", id, userId);
-        itemService.deleteById(userId, id);
     }
 
     @GetMapping("/search")
     public List<ItemDtoResponse> search(@RequestParam String text) {
-        log.info("Received GET request for searching items by text = {}", text);
-        if (text.isBlank()) {
-            return List.of();
-        }
-        return itemService.search(text);
+        return text.isBlank() ? new ArrayList<>() : itemService.search(text);
+    }
+
+    @GetMapping
+    public List<ItemDtoResponse> findAll() {
+        long userId = Long.parseLong(request.getHeader(HEADER));
+        log.info("ItemController.findAll() userId={}", userId);
+        return itemService.findAll(userId);
+    }
+
+    @PatchMapping("/{id}")
+    public ItemDtoResponse update(@PathVariable long id,
+                                  @Validated(Update.class) @RequestBody ItemDtoRequest itemDtoRequest) {
+        long userId = Long.parseLong(request.getHeader(HEADER));
+        log.info("ItemController.update() itemId={}, userId={} ", id, userId);
+        return itemService.update(userId, id, itemDtoRequest);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteById(@PathVariable long id) {
+        long userId = Long.parseLong(request.getHeader(HEADER));
+        log.info("ItemController.deleteById() itemId= {} userId={}", id, userId);
+        itemService.deleteById(userId, id);
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDto createComment(@RequestHeader("X-Sharer-User-Id") long userId,
-                                    @PathVariable long itemId,
-                                    @Valid @RequestBody CommentDto commentDto) {
-        log.info("Received POST request for comment on Item ID = {} from User ID = {}", itemId, userId);
+    public CommentDto createNewComment(@PathVariable long itemId,
+                                       @Valid @RequestBody CommentDto commentDto) {
+        long userId = Long.parseLong(request.getHeader(HEADER));
+        log.info("ItemController.createNewComment() itemId={} userId={}", itemId, userId);
         return commentService.create(userId, itemId, commentDto);
+    }
+
+    @PostMapping
+    public ItemDtoResponse create(@Validated(Create.class) @RequestBody ItemDtoRequest itemDtoRequest) {
+        long userId = Long.parseLong(request.getHeader(HEADER));
+        log.info("ItemController.create() with id={}", userId);
+        return itemService.create(userId, itemDtoRequest);
     }
 }

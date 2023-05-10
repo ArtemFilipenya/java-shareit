@@ -17,8 +17,8 @@ import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
 
-import static ru.practicum.shareit.item.CommentMapper.toComment;
-import static ru.practicum.shareit.item.CommentMapper.toCommentDto;
+import static ru.practicum.shareit.item.CommentMapper.convertToComment;
+import static ru.practicum.shareit.item.CommentMapper.convertToCommentDto;
 
 @Service
 @RequiredArgsConstructor
@@ -29,22 +29,26 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final BookingRepository bookingRepository;
 
-
     @Override
     public CommentDto create(long userId, long itemId, CommentDto commentDto) {
-        User author = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("User ID = " + userId + " not found."));
+        User author = userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("User ID = " + userId + " not found."));
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new NotFoundException("Item ID = " + itemId + " not found."));
-        Booking booking = bookingRepository
-                .findFirstByBookerIdAndItemIdAndEndIsBeforeAndStatusIs(userId, itemId, LocalDateTime.now(), BookingStatus.APPROVED);
+        Booking booking = findBooking(userId, itemId, LocalDateTime.now(), BookingStatus.APPROVED);
+
         if (booking == null) {
-            throw new BadRequestException("User ID = " + userId + " did not take Item ID = " + itemId + ".");
+            throw new BadRequestException("Bad request");
         }
-        Comment comment = toComment(commentDto);
+        Comment comment = convertToComment(commentDto);
         comment.setAuthor(author);
-        comment.setItem(item);
         comment.setCreated(LocalDateTime.now());
-        return toCommentDto(commentRepository.save(comment));
+        comment.setItem(item);
+        return convertToCommentDto(commentRepository.save(comment));
+    }
+
+    private Booking findBooking(long userId, long itemId, LocalDateTime time, BookingStatus status) {
+        return bookingRepository.findFirstByBookerIdAndItemIdAndEndIsBeforeAndStatusIs(userId, itemId,
+                time, status);
     }
 }

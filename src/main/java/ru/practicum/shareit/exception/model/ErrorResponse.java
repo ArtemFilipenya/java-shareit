@@ -1,4 +1,4 @@
-package ru.practicum.shareit.exception;
+package ru.practicum.shareit.exception.model;
 
 public class ErrorResponse {
 
@@ -10,12 +10,12 @@ public class ErrorResponse {
         this.description = description;
     }
 
-    public String getError() {
-        return error;
-    }
-
     public String getDescription() {
         return description;
+    }
+
+    public String getError() {
+        return error;
     }
 }
 
