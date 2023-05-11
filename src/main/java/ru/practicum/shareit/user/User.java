@@ -34,6 +34,7 @@ public class User {
         User user = (User) o;
         return id == user.id || Objects.equals(email, user.email);
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(id, email);

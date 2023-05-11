@@ -4,7 +4,6 @@ import ru.practicum.shareit.booking.dto.BookingDtoRequest;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
-import java.time.LocalDateTime;
 
 public class DateValidator implements ConstraintValidator<EndAfterStartValidation, BookingDtoRequest> {
     @Override

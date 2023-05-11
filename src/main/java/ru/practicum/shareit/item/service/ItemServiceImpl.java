@@ -5,12 +5,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.Booking;
-import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.exception.AccessException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.*;
-import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDtoRequest;
 import ru.practicum.shareit.item.dto.ItemDtoResponse;
 import ru.practicum.shareit.user.User;
@@ -22,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 import static ru.practicum.shareit.booking.BookingMapper.toShortBookingDto;
 import static ru.practicum.shareit.item.ItemMapper.*;
@@ -122,7 +120,7 @@ public class ItemServiceImpl implements ItemService {
             List<Booking> bookingsForResult = bookings.getOrDefault(item, new ArrayList<>());
             Booking lastBooking = bookingsForResult.stream().filter(booking -> !booking.getStart()
                             .isAfter(timeNow))
-                            .findFirst().orElse(null);
+                    .findFirst().orElse(null);
 
             if (lastBooking == null) {
                 itemDtoResponse.setLastBooking(null);
@@ -131,8 +129,8 @@ public class ItemServiceImpl implements ItemService {
             }
 
             Booking nextBooking = bookingsForResult.stream().filter(booking -> booking.getStart()
-                        .isAfter(timeNow) || booking.getStart().isEqual(timeNow))
-                        .reduce((first, second) -> second).orElse(null);
+                            .isAfter(timeNow) || booking.getStart().isEqual(timeNow))
+                    .reduce((first, second) -> second).orElse(null);
 
             if (nextBooking == null) {
                 itemDtoResponse.setNextBooking(null);

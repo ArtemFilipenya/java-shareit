@@ -2,14 +2,12 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.validation_markers.Create;
 import ru.practicum.shareit.validation_markers.Update;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 import static ru.practicum.shareit.user.UserMapper.convertFromUserToDto;
