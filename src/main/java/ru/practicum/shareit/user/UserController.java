@@ -10,9 +10,6 @@ import ru.practicum.shareit.validation_markers.Update;
 
 import java.util.List;
 
-import static ru.practicum.shareit.user.UserMapper.convertFromUserToDto;
-import static ru.practicum.shareit.user.UserMapper.convertUsersToDtoList;
-
 @RestController
 @RequestMapping(path = "/users")
 @RequiredArgsConstructor
@@ -23,13 +20,13 @@ public class UserController {
     @GetMapping("/{id}")
     public UserDto getUserById(@PathVariable long id) {
         log.info("UserController.getUserById() id={}", id);
-        return convertFromUserToDto(userService.getById(id));
+        return UserMapper.convertFromUserToDto(userService.getById(id));
     }
 
     @GetMapping
     public List<UserDto> getAll() {
         log.info("Received GET request for all Users");
-        return convertUsersToDtoList(userService.findAll());
+        return UserMapper.convertUsersToDtoList(userService.findAll());
     }
 
     @PostMapping

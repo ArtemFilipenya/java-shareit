@@ -19,9 +19,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.practicum.shareit.booking.BookingMapper.toBooking;
-import static ru.practicum.shareit.booking.BookingMapper.toBookingDtoResponse;
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -34,7 +31,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public BookingDtoResponse create(BookingDtoRequest bookingDtoRequest, long userId) {
-        Booking booking = toBooking(bookingDtoRequest);
+        Booking booking = BookingMapper.toBooking(bookingDtoRequest);
         Item item = itemRepository.findById(bookingDtoRequest.getItemId())
                 .orElseThrow(() -> new NotFoundException("Item with ID = " + bookingDtoRequest.getItemId() + " not exist."));
         if (!item.getAvailable()) {
@@ -48,7 +45,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setBooker(booker);
         booking.setItem(item);
         booking = bookingRepository.save(booking);
-        return toBookingDtoResponse(booking);
+        return BookingMapper.toBookingDtoResponse(booking);
     }
 
     @Override
@@ -67,7 +64,7 @@ public class BookingServiceImpl implements BookingService {
         } else {
             booking.setStatus(BookingStatus.REJECTED);
         }
-        return toBookingDtoResponse(booking);
+        return BookingMapper.toBookingDtoResponse(booking);
     }
 
     @Override
@@ -78,7 +75,7 @@ public class BookingServiceImpl implements BookingService {
         if (userId != booking.getBooker().getId() && userId != booking.getItem().getOwner().getId()) {
             throw new NotFoundException("User with ID = " + userId + " is not booker or owner and have no access.");
         }
-        return toBookingDtoResponse(booking);
+        return BookingMapper.toBookingDtoResponse(booking);
     }
 
     @Override

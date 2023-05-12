@@ -6,12 +6,10 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserDto;
+import ru.practicum.shareit.user.UserMapper;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.util.List;
-
-import static ru.practicum.shareit.user.UserMapper.convertFromDtoToUser;
-import static ru.practicum.shareit.user.UserMapper.convertFromUserToDto;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +20,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto create(UserDto userDto) {
-        return convertFromUserToDto(userRepository.save(convertFromDtoToUser(userDto)));
+        return UserMapper.convertFromUserToDto(userRepository.save(UserMapper.convertFromDtoToUser(userDto)));
     }
 
     @Override
@@ -37,7 +35,7 @@ public class UserServiceImpl implements UserService {
         if (userDto.getEmail() != null && !userDto.getEmail().isBlank()) {
             foundedUser.setEmail(userDto.getEmail());
         }
-        return convertFromUserToDto(foundedUser);
+        return UserMapper.convertFromUserToDto(foundedUser);
     }
 
     @Override

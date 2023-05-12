@@ -28,12 +28,8 @@ public class ItemController {
     private final ItemService itemService;
     private final CommentService commentService;
 
-    @Autowired
-    private HttpServletRequest request;
-
     @GetMapping("/{id}")
-    public ItemDtoResponse getItemById(@PathVariable long id) {
-        long userId = Long.parseLong(request.getHeader(HEADER));
+    public ItemDtoResponse getItemById(@PathVariable long id, @RequestHeader(HEADER) long userId) {
         log.info("ItemController.getItemById() itemId={} userId={}", id, userId);
         return itemService.getById(userId, id);
     }
@@ -44,38 +40,37 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDtoResponse> findAll() {
-        long userId = Long.parseLong(request.getHeader(HEADER));
+    public List<ItemDtoResponse> findAll(@RequestHeader(HEADER) long userId) {
         log.info("ItemController.findAll() userId={}", userId);
         return itemService.findAll(userId);
     }
 
     @PatchMapping("/{id}")
     public ItemDtoResponse update(@PathVariable long id,
-                                  @Validated(Update.class) @RequestBody ItemDtoRequest itemDtoRequest) {
-        long userId = Long.parseLong(request.getHeader(HEADER));
+                                  @Validated(Update.class) @RequestBody ItemDtoRequest itemDtoRequest,
+                                  @RequestHeader(HEADER) long userId) {
         log.info("ItemController.update() itemId={}, userId={} ", id, userId);
         return itemService.update(userId, id, itemDtoRequest);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteById(@PathVariable long id) {
-        long userId = Long.parseLong(request.getHeader(HEADER));
+    public void deleteById(@PathVariable long id,
+                           @RequestHeader(HEADER) long userId) {
         log.info("ItemController.deleteById() itemId= {} userId={}", id, userId);
         itemService.deleteById(userId, id);
     }
 
     @PostMapping("/{itemId}/comment")
     public CommentDto createNewComment(@PathVariable long itemId,
-                                       @Valid @RequestBody CommentDto commentDto) {
-        long userId = Long.parseLong(request.getHeader(HEADER));
+                                       @Valid @RequestBody CommentDto commentDto,
+                                       @RequestHeader(HEADER) long userId) {
         log.info("ItemController.createNewComment() itemId={} userId={}", itemId, userId);
         return commentService.create(userId, itemId, commentDto);
     }
 
     @PostMapping
-    public ItemDtoResponse create(@Validated(Create.class) @RequestBody ItemDtoRequest itemDtoRequest) {
-        long userId = Long.parseLong(request.getHeader(HEADER));
+    public ItemDtoResponse create(@Validated(Create.class) @RequestBody ItemDtoRequest itemDtoRequest,
+                                  @RequestHeader(HEADER) long userId) {
         log.info("ItemController.create() with id={}", userId);
         return itemService.create(userId, itemDtoRequest);
     }

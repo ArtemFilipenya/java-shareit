@@ -22,41 +22,38 @@ public class BookingController {
     private static final String HEADER = "X-Sharer-User-Id";
     private final BookingService bookingService;
 
-    @Autowired
-    private HttpServletRequest request;
-
     @GetMapping("/{bookingId}")
-    public BookingDtoResponse findById(@PathVariable long bookingId) {
-        long userId = Long.parseLong(request.getHeader(HEADER));
+    public BookingDtoResponse findById(@PathVariable long bookingId,
+                                       @RequestHeader(HEADER) long userId) {
         log.info("BookingController.findById() id={}", bookingId);
         return bookingService.findById(bookingId, userId);
     }
 
     @GetMapping("/owner")
-    public List<BookingDtoResponse> findByOwner(@RequestParam(defaultValue = DEFAULT_STATE) String state) {
-        long userId = Long.parseLong(request.getHeader(HEADER));
+    public List<BookingDtoResponse> findByOwner(@RequestParam(defaultValue = DEFAULT_STATE) String state,
+                                                @RequestHeader(HEADER) long userId) {
         log.info("BookingController.findByOwner() userId ={}", userId);
         return bookingService.findByOwner(userId, state);
     }
 
     @GetMapping
-    public List<BookingDtoResponse> findByBooker(@RequestParam(defaultValue = DEFAULT_STATE) String state) {
-        long userId = Long.parseLong(request.getHeader(HEADER));
+    public List<BookingDtoResponse> findByBooker(@RequestParam(defaultValue = DEFAULT_STATE) String state,
+                                                 @RequestHeader(HEADER) long userId) {
         log.info("BookingController.findByBooker() userId={}", userId);
         return bookingService.findByBooker(userId, state);
     }
 
     @PostMapping()
-    public BookingDtoResponse create(@Validated(Create.class) @RequestBody BookingDtoRequest bookingDtoRequest) {
-        long userId = Long.parseLong(request.getHeader(HEADER));
+    public BookingDtoResponse create(@Validated(Create.class) @RequestBody BookingDtoRequest bookingDtoRequest,
+                                     @RequestHeader(HEADER) long userId) {
         log.info("BookingController.create() id={}", bookingDtoRequest.getItemId());
         return bookingService.create(bookingDtoRequest, userId);
     }
 
     @PatchMapping("/{bookingId}")
     public BookingDtoResponse approve(@PathVariable long bookingId,
-                                      @RequestParam boolean approved) {
-        long userId = Long.parseLong(request.getHeader(HEADER));
+                                      @RequestParam boolean approved,
+                                      @RequestHeader(HEADER) long userId) {
         log.info("BookingController.approve() bookingId={}", bookingId);
         return bookingService.approve(bookingId, userId, approved);
     }
