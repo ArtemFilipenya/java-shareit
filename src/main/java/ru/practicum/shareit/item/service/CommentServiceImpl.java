@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.Booking;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.exception.BadRequestException;
@@ -13,7 +12,6 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
 import java.time.LocalDateTime;
-
 
 
 @Service
@@ -41,7 +39,7 @@ public class CommentServiceImpl implements CommentService {
         comment.setAuthor(author);
         comment.setCreated(LocalDateTime.now());
         comment.setItem(item);
-        return  CommentMapper.convertToCommentDto(commentRepository.save(comment));
+        return CommentMapper.convertToCommentDto(commentRepository.save(comment));
     }
 
     private boolean bookingExists(long userId, long itemId, LocalDateTime time, BookingStatus status) {
