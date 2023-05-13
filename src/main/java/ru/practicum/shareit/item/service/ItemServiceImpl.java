@@ -74,7 +74,7 @@ public class ItemServiceImpl implements ItemService {
 
         itemDtoResponse.setComments(commentRepository.findAllByItemId(itemId)
                 .stream()
-                .map(CommentMapper::convertToCommentDto)
+                .map(CommentMapper::convertToCommentDtoResponse)
                 .collect(toList()));
 
         if (userId == item.getOwner().getId()) {
@@ -114,7 +114,7 @@ public class ItemServiceImpl implements ItemService {
         return items.stream().map(item -> {
             ItemDtoResponse itemDtoResponse = ItemMapper.toItemDtoResponse(item);
             itemDtoResponse.setComments(comments.getOrDefault(item, new ArrayList<>()).stream()
-                    .map(CommentMapper::convertToCommentDto).collect(toList()));
+                    .map(CommentMapper::convertToCommentDtoResponse).collect(toList()));
 
             List<Booking> bookingsForResult = bookings.getOrDefault(item, new ArrayList<>());
             Booking lastBooking = bookingsForResult.stream().filter(booking -> !booking.getStart()
@@ -153,7 +153,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     private Booking findNextBooking(long itemId, LocalDateTime time, BookingStatus status) {
-        return bookingRepository.findFirstByItemIdAndStartGreaterThanEqualAndStatusIsOrderByStartAsc(
+        return bookingRepository.findFirstByItemIdAndStartAfterAndStatusIsOrderByStartAsc(
                 itemId, time, status);
     }
 }

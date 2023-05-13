@@ -7,7 +7,8 @@ import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.exception.BadRequestException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.*;
-import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentDtoRequest;
+import ru.practicum.shareit.item.dto.CommentDtoResponse;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -24,7 +25,7 @@ public class CommentServiceImpl implements CommentService {
     private final BookingRepository bookingRepository;
 
     @Override
-    public CommentDto create(long userId, long itemId, CommentDto commentDto) {
+    public CommentDtoResponse create(long userId, long itemId, CommentDtoRequest commentDtoRequest) {
         User author = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("User ID = " + userId + " not found."));
         Item item = itemRepository.findById(itemId)
@@ -35,11 +36,11 @@ public class CommentServiceImpl implements CommentService {
         if (!isBookingExists) {
             throw new BadRequestException("Bad request");
         }
-        Comment comment = CommentMapper.convertToComment(commentDto);
+        Comment comment = CommentMapper.convertToComment(commentDtoRequest);
         comment.setAuthor(author);
         comment.setCreated(LocalDateTime.now());
         comment.setItem(item);
-        return CommentMapper.convertToCommentDto(commentRepository.save(comment));
+        return CommentMapper.convertToCommentDtoResponse(commentRepository.save(comment));
     }
 
     private boolean bookingExists(long userId, long itemId, LocalDateTime time, BookingStatus status) {

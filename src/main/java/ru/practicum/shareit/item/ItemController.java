@@ -4,9 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.ItemDtoRequest;
-import ru.practicum.shareit.item.dto.ItemDtoResponse;
+import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.service.CommentService;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.validation_markers.Create;
@@ -59,11 +57,11 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDto createNewComment(@PathVariable long itemId,
-                                       @Valid @RequestBody CommentDto commentDto,
-                                       @RequestHeader(HEADER) long userId) {
+    public CommentDtoResponse createNewComment(@PathVariable long itemId,
+                                               @Valid @RequestBody CommentDtoRequest commentDtoRequest,
+                                               @RequestHeader(HEADER) long userId) {
         log.info("ItemController.createNewComment() itemId={} userId={}", itemId, userId);
-        return commentService.create(userId, itemId, commentDto);
+        return commentService.create(userId, itemId, commentDtoRequest);
     }
 
     @PostMapping
