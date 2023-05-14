@@ -33,7 +33,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
                                                                  Sort sort);
 
     Booking findFirstByItemIdAndStartAfterAndStatusIsOrderByStartAsc(long itemId, LocalDateTime start,
-                                                                                BookingStatus status);
+                                                                     BookingStatus status);
 
     Booking findFirstByItemIdAndStartLessThanEqualOrderByStartDesc(long itemId, LocalDateTime start);
 
