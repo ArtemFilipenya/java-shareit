@@ -79,7 +79,7 @@ public class ItemServiceImpl implements ItemService {
 
         if (userId == item.getOwner().getId()) {
             LocalDateTime timeNow = LocalDateTime.now();
-            Booking nextBooking = findNextBooking(itemId, timeNow, BookingStatus.APPROVED);
+            Booking nextBooking = findNextBooking(itemId, timeNow);
             Booking lastBooking = findLastBooking(itemId, timeNow);
 
             if (lastBooking == null) {
@@ -113,10 +113,10 @@ public class ItemServiceImpl implements ItemService {
 
         return items.stream().map(item -> {
             ItemDtoResponse itemDtoResponse = ItemMapper.toItemDtoResponse(item);
-            itemDtoResponse.setComments(comments.getOrDefault(item, new ArrayList<>()).stream()
+            itemDtoResponse.setComments(comments.getOrDefault(item, List.of()).stream()
                     .map(CommentMapper::convertToCommentDtoResponse).collect(toList()));
 
-            List<Booking> bookingsForResult = bookings.getOrDefault(item, new ArrayList<>());
+            List<Booking> bookingsForResult = bookings.getOrDefault(item, List.of());
             Booking lastBooking = bookingsForResult.stream().filter(booking -> !booking.getStart()
                             .isAfter(timeNow))
                     .findFirst().orElse(null);
@@ -125,8 +125,7 @@ public class ItemServiceImpl implements ItemService {
                 itemDtoResponse.setLastBooking(BookingMapper.toShortBookingDto(lastBooking));
             }
 
-            Booking nextBooking = bookingsForResult.stream().filter(booking -> booking.getStart()
-                            .isAfter(timeNow) || booking.getStart().isEqual(timeNow))
+            Booking nextBooking = bookingsForResult.stream().filter(booking -> booking.getStart().isAfter(timeNow))
                     .reduce((first, second) -> second).orElse(null);
 
             if (nextBooking != null) {
@@ -152,8 +151,8 @@ public class ItemServiceImpl implements ItemService {
         return bookingRepository.findFirstByItemIdAndStartLessThanEqualOrderByStartDesc(itemId, time);
     }
 
-    private Booking findNextBooking(long itemId, LocalDateTime time, BookingStatus status) {
+    private Booking findNextBooking(long itemId, LocalDateTime time) {
         return bookingRepository.findFirstByItemIdAndStartAfterAndStatusIsOrderByStartAsc(
-                itemId, time, status);
+                itemId, time, BookingStatus.APPROVED);
     }
 }
