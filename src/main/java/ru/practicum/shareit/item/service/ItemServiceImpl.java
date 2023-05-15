@@ -1,69 +1,157 @@
 package ru.practicum.shareit.item.service;
 
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.item.exception.OwnerNotFoundException;
-import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.storage.ItemDao;
-import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.storage.UserDao;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.Booking;
+import ru.practicum.shareit.booking.BookingMapper;
+import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.BookingStatus;
+import ru.practicum.shareit.exception.AccessException;
+import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.*;
+import ru.practicum.shareit.item.dto.ItemDtoRequest;
+import ru.practicum.shareit.item.dto.ItemDtoResponse;
+import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.UserRepository;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 @Service
-@AllArgsConstructor
-@Slf4j
+@RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
-    private static final String OWNER_NOT_FOUND_MESSAGE = "Not found user. id: ";
-    private static final int MIN_SEARCH_REQUEST_LENGTH = 3;
-
-    private final ItemDao itemDao;
-    private final UserDao userDao;
+    private final ItemRepository itemRepository;
+    private final CommentRepository commentRepository;
+    private final BookingRepository bookingRepository;
+    private final UserRepository userRepository;
 
     @Override
-    public Item createItem(Item item) {
-        boolean ownerExists = isOwnerExists(item.getOwner());
-        if (!ownerExists) {
-            throw new OwnerNotFoundException(OWNER_NOT_FOUND_MESSAGE + item.getOwner());
+    @Transactional
+    public ItemDtoResponse create(long userId, ItemDtoRequest itemDtoRequest) {
+        User owner = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User ID = " + userId + " not found."));
+        Item item = ItemMapper.fromItemDtoRequest(itemDtoRequest, owner);
+        item.setOwner(owner);
+        Item result = itemRepository.save(item);
+        return ItemMapper.toItemDtoResponse(result);
+    }
+
+    @Override
+    @Transactional
+    public ItemDtoResponse update(long userId, long itemId, ItemDtoRequest itemDtoRequest) {
+        Item item = itemRepository.findById(itemId).orElseThrow(() ->
+                new NotFoundException(String.format("Item with id=%s not found", itemId)));
+
+        if (item.getOwner().getId() != userId) {
+            throw new AccessException(String.format("User with id=%s is not owner", userId));
         }
-        log.info("Creat new item: {}", item.getName());
-        return itemDao.createItem(item);
-    }
-
-    @Override
-    public Item updateItem(Item item) {
-        log.info("Update item: {}", item.getName());
-        return itemDao.updateItem(item);
-    }
-
-    @Override
-    public Item findItemById(Long itemId) {
-        log.info("Find item by id: {}", itemId);
-        return itemDao.findItemById(itemId);
-    }
-
-    @Override
-    public List<Item> findAllItems(Long userId) {
-        log.info("Find all items by user id: {}", userId);
-        return itemDao.findAllItems(userId);
-    }
-
-    @Override
-    public List<Item> findItemsByRequest(String text) {
-        if (text == null || text.isBlank() || text.length() <= MIN_SEARCH_REQUEST_LENGTH) {
-            return new ArrayList<>();
+        if (itemDtoRequest.getName() != null && !itemDtoRequest.getName().isBlank()) {
+            item.setName(itemDtoRequest.getName());
         }
-        log.info("Find items by request: {}", text);
-        return itemDao.findItemsByRequest(text);
+        if (itemDtoRequest.getAvailable() != null) {
+            item.setAvailable(itemDtoRequest.getAvailable());
+        }
+        if (itemDtoRequest.getDescription() != null && !itemDtoRequest.getDescription().isBlank()) {
+            item.setDescription(itemDtoRequest.getDescription());
+        }
+        return ItemMapper.toItemDtoResponse(item);
     }
 
-    private boolean isOwnerExists(long ownerId) {
-        List<User> users = userDao.findAllUsers();
-        List<User> result = users.stream().filter(user -> user.getId() == ownerId).collect(Collectors.toList());
-        return result.size() > 0;
+    @Override
+    @Transactional(readOnly = true)
+    public ItemDtoResponse getById(long userId, long itemId) {
+        userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Not Found"));
+        Item item = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException("Not Found"));
+        ItemDtoResponse itemDtoResponse = ItemMapper.toItemDtoResponse(item);
+
+        itemDtoResponse.setComments(commentRepository.findAllByItemId(itemId)
+                .stream()
+                .map(CommentMapper::convertToCommentDtoResponse)
+                .collect(toList()));
+
+        if (userId == item.getOwner().getId()) {
+            LocalDateTime timeNow = LocalDateTime.now();
+            Booking nextBooking = findNextBooking(itemId, timeNow);
+            Booking lastBooking = findLastBooking(itemId, timeNow);
+
+            if (lastBooking == null) {
+                itemDtoResponse.setLastBooking(null);
+            } else {
+                itemDtoResponse.setLastBooking(BookingMapper.toShortBookingDto(lastBooking));
+            }
+            if (nextBooking == null) {
+                itemDtoResponse.setNextBooking(null);
+            } else {
+                itemDtoResponse.setNextBooking(BookingMapper.toShortBookingDto(nextBooking));
+            }
+        }
+        return itemDtoResponse;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ItemDtoResponse> findAll(long userId) {
+        LocalDateTime timeNow = LocalDateTime.now();
+        List<Item> items = itemRepository.findAllByOwnerId(userId);
+        Map<Item, List<Comment>> comments = commentRepository.findAllByItemIn(items, Sort.by(Sort.Direction.DESC,
+                        "created"))
+                .stream()
+                .collect(Collectors.groupingBy(Comment::getItem));
+
+        Map<Item, List<Booking>> bookings = bookingRepository
+                .findAllByItemInAndStatus(items, BookingStatus.APPROVED, Sort.by(Sort.Direction.DESC, "start"))
+                .stream()
+                .collect(Collectors.groupingBy(Booking::getItem));
+
+        return items.stream().map(item -> {
+            ItemDtoResponse itemDtoResponse = ItemMapper.toItemDtoResponse(item);
+            itemDtoResponse.setComments(comments.getOrDefault(item, List.of()).stream()
+                    .map(CommentMapper::convertToCommentDtoResponse).collect(toList()));
+
+            List<Booking> bookingsForResult = bookings.getOrDefault(item, List.of());
+            Booking lastBooking = bookingsForResult.stream().filter(booking -> !booking.getStart()
+                            .isAfter(timeNow))
+                    .findFirst().orElse(null);
+
+            if (lastBooking != null) {
+                itemDtoResponse.setLastBooking(BookingMapper.toShortBookingDto(lastBooking));
+            }
+
+            Booking nextBooking = bookingsForResult.stream().filter(booking -> booking.getStart().isAfter(timeNow))
+                    .reduce((first, second) -> second).orElse(null);
+
+            if (nextBooking != null) {
+                itemDtoResponse.setNextBooking(BookingMapper.toShortBookingDto(nextBooking));
+            }
+            return itemDtoResponse;
+        }).collect(toList());
+    }
+
+    @Override
+    @Transactional
+    public void deleteById(long userId, long itemId) {
+        itemRepository.deleteById(itemId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ItemDtoResponse> search(String text) {
+        return ItemMapper.toItemDtoList(itemRepository.search(text));
+    }
+
+    private Booking findLastBooking(long itemId, LocalDateTime time) {
+        return bookingRepository.findFirstByItemIdAndStartLessThanEqualOrderByStartDesc(itemId, time);
+    }
+
+    private Booking findNextBooking(long itemId, LocalDateTime time) {
+        return bookingRepository.findFirstByItemIdAndStartAfterAndStatusIsOrderByStartAsc(
+                itemId, time, BookingStatus.APPROVED);
     }
 }
