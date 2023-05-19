@@ -1,20 +1,29 @@
 package ru.practicum.shareit.item.service;
 
-import ru.practicum.shareit.item.dto.ItemDtoRequest;
-import ru.practicum.shareit.item.dto.ItemDtoResponse;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemAllDto;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.model.ItemRequest;
 
 import java.util.List;
 
 public interface ItemService {
-    ItemDtoResponse create(long userId, ItemDtoRequest itemDtoRequest);
+    ItemAllDto get(Long id, Long userId);
 
-    ItemDtoResponse update(long userId, long itemId, ItemDtoRequest itemDtoRequest);
+    ItemDto save(ItemDto item, ItemRequestDto itemRequestDto, Long userId);
 
-    ItemDtoResponse getById(long userId, long itemId);
+    ItemDto update(ItemDto item, Long id, Long userId);
 
-    List<ItemDtoResponse> findAll(long userId);
+    List<ItemAllDto> getAll(Long id, Integer from, Integer size);
 
-    void deleteById(long userId, long itemId);
+    List<ItemDto> getByText(String text, Long userId, Integer from, Integer size);
 
-    List<ItemDtoResponse> search(String text);
+    CommentDto createComment(CommentDto comment, Long itemId, Long userId);
+
+    List<CommentDto> getAllComments();
+
+    List<ItemDto> getItemsByRequests(List<ItemRequest> requests);
+
+    List<ItemDto> getItemsByRequestId(Long requestId);
 }

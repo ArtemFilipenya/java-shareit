@@ -1,59 +1,106 @@
 package ru.practicum.shareit.user.service;
 
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.exception.NotFoundException;
-import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserDto;
-import ru.practicum.shareit.user.UserMapper;
-import ru.practicum.shareit.user.UserRepository;
+import ru.practicum.shareit.errors.exception.BadParameterException;
+import ru.practicum.shareit.errors.exception.ObjectNotFoundException;
+import ru.practicum.shareit.errors.exception.ParameterException;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.mapper.UserMapper;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserStorage;
 
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
+
+@Slf4j
 @Service
-@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
+    private final UserStorage userStorage;
 
-    private final UserRepository userRepository;
+    @Autowired
+    public UserServiceImpl(UserStorage userStorage) {
+        this.userStorage = userStorage;
+    }
+
 
     @Override
-    @Transactional
-    public UserDto create(UserDto userDto) {
-        return UserMapper.convertFromUserToDto(userRepository.save(UserMapper.convertFromDtoToUser(userDto)));
+    public List<UserDto> findAll() {
+        return userStorage.findAll()
+                .stream()
+                .map(UserMapper::convertModelToDto)
+                .collect(toList());
     }
 
     @Override
     @Transactional
-    public UserDto update(long userId, UserDto userDto) {
-        User foundedUser = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(String.format("User with id= %s not found", userId)));
+    public UserDto update(UserDto userDto, Long id) {
+        User user = userStorage.findById(id).orElseThrow(() -> new ObjectNotFoundException("User not found"));
 
-        if (userDto.getName() != null && !userDto.getName().isBlank()) {
-            foundedUser.setName(userDto.getName());
+        if (userDto.getName() != null) {
+            user.setName(userDto.getName());
         }
-        if (userDto.getEmail() != null && !userDto.getEmail().isBlank()) {
-            foundedUser.setEmail(userDto.getEmail());
+        if (userDto.getEmail() != null) {
+            if (isValidEmailAddress(userDto.getEmail())) {
+                throw new BadParameterException("Invalid email format");
+            }
+            user.setEmail(userDto.getEmail());
         }
-        return UserMapper.convertFromUserToDto(foundedUser);
-    }
 
-    @Override
-    @Transactional(readOnly = true)
-    public User getById(long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format("User with id= %s not found", id)));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<User> findAll() {
-        return userRepository.findAll();
+        try {
+            return UserMapper.convertModelToDto(userStorage.save(user));
+        } catch (DataIntegrityViolationException ex) {
+            if (ex.getCause() instanceof ConstraintViolationException) {
+                throw new ParameterException(ex.getMessage());
+            }
+        }
+        return null;
     }
 
     @Override
     @Transactional
-    public void deleteById(long id) {
-        userRepository.deleteById(id);
+    public UserDto save(UserDto userDto) {
+        checkToValid(userDto);
+        return UserMapper.convertModelToDto(userStorage.save(UserMapper.convertDtoToModel(userDto)));
+    }
+
+    @Override
+    public UserDto get(Long id) {
+        if (id == null) {
+            throw new BadParameterException("BadParameterException");
+        }
+        User user = userStorage.findById(id).orElseThrow(() -> new ObjectNotFoundException("User not found"));
+
+        return UserMapper.convertModelToDto(user);
+    }
+
+    @Override
+    @Transactional
+    public void delete(Long id) {
+        if (id == null) {
+            throw new BadParameterException("BadParameterException");
+        }
+        userStorage.deleteById(id);
+    }
+
+    private void checkToValid(UserDto user) {
+        if (user == null) {
+            throw new BadParameterException("BadParameterException");
+        } else if (user.getEmail() == null) {
+            throw new BadParameterException("BadParameterException");
+        } else if (isValidEmailAddress(user.getEmail())) {
+            throw new BadParameterException("BadParameterException");
+        }
+    }
+
+    private boolean isValidEmailAddress(String email) {
+        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$";
+        return !email.matches(emailRegex);
     }
 }
