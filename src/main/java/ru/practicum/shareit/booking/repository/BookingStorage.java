@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface BookingStorage extends JpaRepository<Booking, Long> {
-    //for owner
+
     List<Booking> findBookingsByItemOwnerIsAndStartBeforeAndEndAfterOrderByStartDesc(User owner,
                                                                                      LocalDateTime startDateTime,
                                                                                      LocalDateTime endDateTime);
