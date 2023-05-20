@@ -1,41 +1,44 @@
-package ru.practicum.shareit.user.controller;
+package ru.practicum.shareit.user;
 
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.errors.exception.BadParameterException;
 import ru.practicum.shareit.errors.exception.ObjectNotFoundException;
-import ru.practicum.shareit.user.service.UserService;
-import org.springframework.test.web.servlet.MockMvc;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import ru.practicum.shareit.user.controller.UserController;
 import ru.practicum.shareit.user.dto.UserDto;
-import org.junit.jupiter.api.Test;
+import ru.practicum.shareit.user.service.UserService;
+
 import java.util.List;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.http.MediaType.*;
-import static java.nio.charset.StandardCharsets.*;
-import static org.mockito.ArgumentMatchers.*;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @WebMvcTest(controllers = UserController.class)
 class UserControllerTest {
+    private final UserDto userDto = UserDto.builder()
+            .id(1L)
+            .name("Michael")
+            .email("michael@mail.com")
+            .build();
     @MockBean
     UserService userService;
     @Autowired
     ObjectMapper mapper;
     @Autowired
     private MockMvc mvc;
-
-    private final UserDto userDto = UserDto.builder()
-            .id(1L)
-            .name("Michael")
-            .email("michael@mail.com")
-            .build();
 
     @Test
     void saveUserValidationExceptionTest() throws Exception {

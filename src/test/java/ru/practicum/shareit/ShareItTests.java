@@ -6,15 +6,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 class ShareItTests {
-	@Autowired
-	private ShareItApp shareItApp;
+    @Autowired
+    private ShareItApp shareItApp;
 
-	@Test
-	public void main() {
-		shareItApp.main(new String[]{});
-	}
+    @Test
+    public void main() {
+        ShareItApp.main(new String[]{});
+    }
 
-	@Test
-	void contextLoads() {
-	}
+    @Test
+    void contextLoads() {
+    }
 }

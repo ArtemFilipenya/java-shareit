@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item.controller;
+package ru.practicum.shareit.item;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -8,38 +8,28 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.shareit.errors.exception.BadParameterException;
 import ru.practicum.shareit.errors.exception.ObjectNotFoundException;
+import ru.practicum.shareit.item.controller.ItemController;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemAllDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.time.LocalDateTime.now;
+import static java.util.List.of;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.List.*;
-
-import static java.time.LocalDateTime.now;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @WebMvcTest(controllers = ItemController.class)
 class ItemControllerTest {
     private final String headerSharerUserId = "X-Sharer-User-Id";
-    @MockBean
-    ItemRequestService itemRequestService;
-    @MockBean
-    ItemService itemService;
-    @Autowired
-    ObjectMapper mapper;
-    @Autowired
-    private MockMvc mvc;
-
     private final CommentDto commentDto = CommentDto.builder()
             .id(1L)
             .text("qwerty")
@@ -47,7 +37,6 @@ class ItemControllerTest {
             .authorName("Paul")
             .created(now())
             .build();
-
     private final ItemAllDto itemExtendedDto = new ItemAllDto(
             1L,
             "blue pen",
@@ -58,7 +47,6 @@ class ItemControllerTest {
             null,
             null,
             of(commentDto));
-
     private final ItemDto itemDto = ItemDto.builder()
             .id(1L)
             .name("pen")
@@ -66,6 +54,14 @@ class ItemControllerTest {
             .available(true)
             .requestId(1L)
             .build();
+    @MockBean
+    ItemRequestService itemRequestService;
+    @MockBean
+    ItemService itemService;
+    @Autowired
+    ObjectMapper mapper;
+    @Autowired
+    private MockMvc mvc;
 
     @Test
     void saveTest() throws Exception {

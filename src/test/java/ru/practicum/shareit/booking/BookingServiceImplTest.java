@@ -1,79 +1,53 @@
-package ru.practicum.shareit.booking.service;
+package ru.practicum.shareit.booking;
 
+import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.booking.dto.BookingAllDto;
 import ru.practicum.shareit.booking.dto.BookingControllerDto;
-import ru.practicum.shareit.item.dto.ItemAllDto;
-import ru.practicum.shareit.item.service.ItemService;
-import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.item.dto.ItemAllDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import org.junit.jupiter.api.BeforeEach;
-import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.Test;
+import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.service.UserService;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
-
 import java.util.List;
 
-import static ru.practicum.shareit.enums.Status.*;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.equalTo;
 import static java.time.LocalDateTime.now;
 import static java.util.List.of;
-
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static ru.practicum.shareit.enums.Status.APPROVED;
+import static ru.practicum.shareit.enums.Status.WAITING;
 
 @Transactional
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class BookingServiceImplTest {
-    private BookingAllDto bookingAllFieldsDto;
     private final BookingService bookingService;
     private final EntityManager entityManager;
     private final UserService userService;
     private final ItemService itemService;
+    private BookingAllDto bookingAllFieldsDto;
     private ItemDto itemDto;
     private UserDto owner;
 
     @BeforeEach
     void initialize() {
-        owner = userService.save(
-                new UserDto(
-                        null,
-                        "Lora",
-                        "lora@mail.com")
-        );
+        owner = userService.save(new UserDto(null, "Mika", "Mika@mail.com"));
         UserDto booker = userService.save(
-                new UserDto(
-                        null,
-                        "Mike",
-                        "mike@mail.com")
-        );
-        itemDto = itemService.save(
-                new ItemDto(
-                        null,
-                        "pen",
-                        "blue",
-                        true,
-                        null),
-                null,
-                owner.getId()
-        );
-        ItemAllDto itemAllFieldsDto = new ItemAllDto(
-                itemDto.getId(),
-                itemDto.getName(),
-                itemDto.getDescription(),
-                true,
-                owner.getId(),
-                null,
-                null,
-                null,
-                of()
-        );
+                new UserDto(null, "Mika", "mika@mail.com"));
+        itemDto = itemService.save(new ItemDto(null, "pen", "blue", true, null),
+                null, owner.getId());
+        ItemAllDto itemAllFieldsDto = new ItemAllDto(itemDto.getId(), itemDto.getName(), itemDto.getDescription(), true,
+                owner.getId(), null, null, null, of());
 
         BookingControllerDto bookingSavingDto = BookingControllerDto.builder()
                 .id(1L)

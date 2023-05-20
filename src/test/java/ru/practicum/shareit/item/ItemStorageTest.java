@@ -1,4 +1,4 @@
-package ru.practicum.shareit.item.repository;
+package ru.practicum.shareit.item;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -6,19 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.ItemStorage;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.*;
 
 @DataJpaTest
 class ItemStorageTest {
-    @Autowired
-    private TestEntityManager entityManager;
     @Autowired
     ItemStorage itemStorage;
     User user = User.builder()
@@ -29,6 +26,8 @@ class ItemStorageTest {
     Item item1;
     Item item2;
     Item item3;
+    @Autowired
+    private TestEntityManager entityManager;
 
     @BeforeEach
     void beforeEach() {

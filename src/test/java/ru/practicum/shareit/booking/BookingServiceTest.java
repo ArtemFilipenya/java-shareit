@@ -1,40 +1,41 @@
-package ru.practicum.shareit.booking.service;
+package ru.practicum.shareit.booking;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import ru.practicum.shareit.booking.repository.BookingStorage;
 import ru.practicum.shareit.booking.dto.BookingAllDto;
 import ru.practicum.shareit.booking.dto.BookingControllerDto;
-
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingStorage;
+import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.booking.service.BookingServiceImpl;
 import ru.practicum.shareit.errors.exception.BadParameterException;
 import ru.practicum.shareit.errors.exception.ObjectNotFoundException;
 import ru.practicum.shareit.item.mapper.ItemMapper;
-import ru.practicum.shareit.user.service.UserService;
-
-import org.mockito.junit.jupiter.MockitoExtension;
-import ru.practicum.shareit.booking.model.Booking;
-import org.junit.jupiter.api.extension.ExtendWith;
-import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
 
-import static ru.practicum.shareit.user.mapper.UserMapper.convertDtoToModel;
+import static java.time.LocalDateTime.now;
+import static java.util.List.of;
+import static java.util.Optional.ofNullable;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
+import static org.springframework.data.domain.Page.empty;
 import static ru.practicum.shareit.enums.States.*;
 import static ru.practicum.shareit.enums.Status.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.springframework.data.domain.Page.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static java.util.Optional.ofNullable;
-import static org.mockito.Mockito.lenient;
-import static java.time.LocalDateTime.*;
-import static org.mockito.Mockito.*;
-import static java.util.List.*;
+import static ru.practicum.shareit.user.mapper.UserMapper.convertDtoToModel;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -51,7 +52,7 @@ class BookingServiceTest {
     @BeforeEach
     void initialize() {
         bookingService = new BookingServiceImpl(bookingStorage, userService);
-        bookingControllerDto = bookingControllerDto.builder()
+        bookingControllerDto = BookingControllerDto.builder()
                 .id(1L)
                 .start(now())
                 .end(now().plusHours(2))
@@ -232,130 +233,99 @@ class BookingServiceTest {
 
     @Test
     void approveBookingTest() {
-        var approved = new Booking(
-                booking.getId(),
-                booking.getStart(),
-                booking.getEnd(),
-                booking.getItem(),
-                booking.getBooker(),
-                APPROVED);
-        when(bookingStorage.findById(anyLong()))
-                .thenReturn(ofNullable(booking));
-        when(bookingStorage.save(any()))
-                .thenReturn(approved);
-        var approvedFrom = bookingService.approve(
-                booking.getId(),
-                true,
-                userDto.getId()
-        );
+        Booking approved = new Booking(booking.getStatus(), booking.getId(), booking.getStart(), booking.getEnd(),
+                booking.getItem(), booking.getBooker());
+        when(bookingStorage.findById(anyLong())).thenReturn(ofNullable(booking));
+        when(bookingStorage.save(any())).thenReturn(approved);
+        BookingAllDto approvedFrom = bookingService.approve(booking.getId(), true, userDto.getId());
+
         assertEquals(approvedFrom.getStatus().name(), approved.getStatus().name());
         assertEquals(approvedFrom.getId(), approved.getId());
     }
 
     @Test
     void approveBookingByBookerTest() {
-        when(bookingStorage.findById(anyLong()))
-                .thenReturn(ofNullable(booking));
-        Exception exception = assertThrows(ObjectNotFoundException.class,
-                () -> bookingService.approve(
-                        booking.getId(),
-                        true,
-                        booking.getBooker().getId())
-        );
+        when(bookingStorage.findById(anyLong())).thenReturn(ofNullable(booking));
+        Exception exception = assertThrows(ObjectNotFoundException.class, () -> bookingService.approve(booking.getId(),
+                true, booking.getBooker().getId()));
         assertEquals("User not found", exception.getMessage());
     }
 
     @Test
     void getNotFoundBookingTest() {
-        when(bookingStorage.findById(anyLong()))
-                .thenThrow(ObjectNotFoundException.class);
+        when(bookingStorage.findById(anyLong())).thenThrow(ObjectNotFoundException.class);
+
         assertThrows(ObjectNotFoundException.class, () -> bookingService.get(7L, 7L));
     }
 
     @Test
     void approveApprovedBookingTest() {
         booking.setStatus(APPROVED);
-        when(bookingStorage.findById(anyLong()))
-                .thenReturn(ofNullable(booking));
-        Exception exception = assertThrows(BadParameterException.class,
-                () -> bookingService.approve(
-                        booking.getId(),
-                        true,
-                        userDto.getId())
-        );
+        when(bookingStorage.findById(anyLong())).thenReturn(ofNullable(booking));
+        Exception exception = assertThrows(BadParameterException.class, () -> bookingService.approve(booking.getId(),
+                true, userDto.getId()));
+
         assertEquals("BadParameterException", exception.getMessage());
     }
 
     @Test
     void getBookingTest() {
         BookingAllDto bookingAllFieldsDto = saveBookingDto();
-        when(bookingStorage.findById(anyLong()))
-                .thenReturn(ofNullable(booking));
-        BookingAllDto bookingFrom = bookingService.get(
-                bookingAllFieldsDto.getId(),
-                userDto.getId()
-        );
+        when(bookingStorage.findById(anyLong())).thenReturn(ofNullable(booking));
+        BookingAllDto bookingFrom = bookingService.get(bookingAllFieldsDto.getId(), userDto.getId());
+
         assertEquals(bookingFrom.getItem().getId(), booking.getItem().getId());
         assertEquals(bookingFrom.getId(), booking.getId());
     }
 
     @Test
     void getBookingByAnotherUserTest() {
-        when(bookingStorage.findById(anyLong()))
-                .thenReturn(ofNullable(booking));
-        assertThrows(ObjectNotFoundException.class, () -> bookingService.get(booking.getId(), 7L)
-        );
+        when(bookingStorage.findById(anyLong())).thenReturn(ofNullable(booking));
+
+        assertThrows(ObjectNotFoundException.class, () -> bookingService.get(booking.getId(), 7L));
     }
 
     @Test
     void getAllBookingsIncorrectEndPaginationTest() {
-        Exception exception = assertThrows(BadParameterException.class,
-                () -> bookingService.getAll(
-                        userDto.getId(), "Unknown", 0, 0));
+        Exception exception = assertThrows(BadParameterException.class, () -> bookingService.getAll(userDto.getId(),
+                "Unknown", 0, 0));
+
         assertEquals("BadParameterException", exception.getMessage());
     }
 
     @Test
     void getAllBookingsTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByBookerIsOrderByStartDesc(any()))
-                .thenReturn(of(booking));
-        List<BookingAllDto> bookings = bookingService.getAll(
-                userDto.getId(), null, null, null
-        );
+        when(bookingStorage.findBookingsByBookerIsOrderByStartDesc(any())).thenReturn(of(booking));
+        List<BookingAllDto> bookings = bookingService.getAll(userDto.getId(), null, null, null);
+
         assertEquals(bookings.get(0).getId(), booking.getId());
         assertEquals(bookings.size(), 1);
     }
 
     @Test
     void getAllBookingsIncorrectStartPaginationTest() {
-        Exception exception = assertThrows(BadParameterException.class,
-                () -> bookingService.getAll(
-                        userDto.getId(), "Unknown", -1, 14)
-        );
+        Exception exception = assertThrows(BadParameterException.class, () -> bookingService.getAll(userDto.getId(),
+                "Unknown", -1, 14));
+
         assertEquals("BadParameterException", exception.getMessage());
     }
 
     @Test
     void getAllBookingsWithNotValidStateTest() {
         saveBookingDto();
-        Exception exception = assertThrows(BadParameterException.class, () -> bookingService.getAll(userDto.getId(), "Unknown",
-                        null, null)
-        );
+        Exception exception = assertThrows(BadParameterException.class, () -> bookingService.getAll(userDto.getId(),
+                "Unknown", null, null));
+
         assertEquals("BadParameterException", exception.getMessage());
     }
 
     @Test
     void getAllBookingsFutureStateTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByBookerIsAndStartIsAfterOrderByStartDesc(any(), any()))
-                .thenReturn(of(booking));
-        List<BookingAllDto> bookings = bookingService.getAll(
-                userDto.getId(),
-                FUTURE.name(),
-                null,
-                null
-        );
+        when(bookingStorage.findBookingsByBookerIsAndStartIsAfterOrderByStartDesc(any(), any())).thenReturn(of(booking));
+        List<BookingAllDto> bookings = bookingService.getAll(userDto.getId(), FUTURE.name(), null, null);
+
         assertEquals(bookings.get(0).getId(), booking.getId());
         assertEquals(bookings.size(), 1);
     }
@@ -363,14 +333,9 @@ class BookingServiceTest {
     @Test
     void getAllBookingsPastStateTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByBookerIsAndEndBeforeOrderByStartDesc(any(), any()))
-                .thenReturn(of(booking));
-        List<BookingAllDto> bookings = bookingService.getAll(
-                userDto.getId(),
-                PAST.name(),
-                null,
-                null
-        );
+        when(bookingStorage.findBookingsByBookerIsAndEndBeforeOrderByStartDesc(any(), any())).thenReturn(of(booking));
+        List<BookingAllDto> bookings = bookingService.getAll(userDto.getId(), PAST.name(), null, null);
+
         assertEquals(bookings.get(0).getId(), booking.getId());
         assertEquals(bookings.size(), 1);
     }
@@ -378,14 +343,9 @@ class BookingServiceTest {
     @Test
     void getAllBookingsCurrentStateTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByBookerIsAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any()))
-                .thenReturn(of(booking));
-        List<BookingAllDto> bookings = bookingService.getAll(
-                userDto.getId(),
-                CURRENT.name(),
-                null,
-                null
-        );
+        when(bookingStorage.findBookingsByBookerIsAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any())).thenReturn(of(booking));
+        List<BookingAllDto> bookings = bookingService.getAll(userDto.getId(), CURRENT.name(), null, null);
+
         assertEquals(bookings.get(0).getId(), booking.getId());
         assertEquals(bookings.size(), 1);
     }
@@ -393,28 +353,18 @@ class BookingServiceTest {
     @Test
     void getAllBookingsEmptyTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByBookerIsAndStartIsAfterOrderByStartDesc(any(), any()))
-                .thenReturn(of());
-        List<BookingAllDto> bookings = bookingService.getAll(
-                userDto.getId(),
-                FUTURE.name(),
-                null,
-                null
-        );
+        when(bookingStorage.findBookingsByBookerIsAndStartIsAfterOrderByStartDesc(any(), any())).thenReturn(of());
+        List<BookingAllDto> bookings = bookingService.getAll(userDto.getId(), FUTURE.name(), null, null);
+
         assertEquals(bookings.size(), 0);
     }
 
     @Test
     void getAllBookingsRejectStateTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByBookerIsAndStatusIsOrderByStartDesc(any(), any()))
-                .thenReturn(of(booking));
-        List<BookingAllDto> bookings = bookingService.getAll(
-                userDto.getId(),
-                REJECTED.name(),
-                null,
-                null
-        );
+        when(bookingStorage.findBookingsByBookerIsAndStatusIsOrderByStartDesc(any(), any())).thenReturn(of(booking));
+        List<BookingAllDto> bookings = bookingService.getAll(userDto.getId(), REJECTED.name(), null, null);
+
         assertEquals(bookings.get(0).getId(), booking.getId());
         assertEquals(bookings.size(), 1);
     }
@@ -422,28 +372,18 @@ class BookingServiceTest {
     @Test
     void getAllBookingsCancelStateEmptyTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByBookerIsAndStatusIsOrderByStartDesc(any(), any()))
-                .thenReturn(of());
-        List<BookingAllDto> bookings = bookingService.getAll(
-                userDto.getId(),
-                CANCELED.name(),
-                null,
-                null
-        );
+        when(bookingStorage.findBookingsByBookerIsAndStatusIsOrderByStartDesc(any(), any())).thenReturn(of());
+        List<BookingAllDto> bookings = bookingService.getAll(userDto.getId(), CANCELED.name(), null, null);
+
         assertEquals(bookings.size(), 0);
     }
 
     @Test
     void getBookingsByOwnerIdPastStateTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByItemOwnerAndEndBeforeOrderByStartDesc(any(), any()))
-                .thenReturn(of(booking));
-        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(
-                userDto.getId(),
-                PAST.name(),
-                null,
-                null
-        );
+        when(bookingStorage.findBookingsByItemOwnerAndEndBeforeOrderByStartDesc(any(), any())).thenReturn(of(booking));
+        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(userDto.getId(), PAST.name(), null, null);
+
         assertEquals(bookings.get(0).getId(), booking.getId());
         assertEquals(bookings.size(), 1);
     }
@@ -451,14 +391,9 @@ class BookingServiceTest {
     @Test
     void getBookingsByOwnerIdTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByItemOwnerIsOrderByStartDesc(any()))
-                .thenReturn(of(booking));
-        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(
-                userDto.getId(),
-                null,
-                null,
-                null
-        );
+        when(bookingStorage.findBookingsByItemOwnerIsOrderByStartDesc(any())).thenReturn(of(booking));
+        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(userDto.getId(), null, null, null);
+
         assertEquals(bookings.get(0).getId(), booking.getId());
         assertEquals(bookings.size(), 1);
     }
@@ -466,14 +401,9 @@ class BookingServiceTest {
     @Test
     void getBookingsByOwnerIdAllStateTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByItemOwnerIsOrderByStartDesc(any()))
-                .thenReturn(of(booking));
-        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(
-                userDto.getId(),
-                ALL.name(),
-                null,
-                null
-        );
+        when(bookingStorage.findBookingsByItemOwnerIsOrderByStartDesc(any())).thenReturn(of(booking));
+        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(userDto.getId(), ALL.name(), null, null);
+
         assertEquals(bookings.get(0).getId(), booking.getId());
         assertEquals(bookings.size(), 1);
     }
@@ -481,14 +411,9 @@ class BookingServiceTest {
     @Test
     void getBookingsByOwnerIdFutureStateTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByItemOwnerAndStartAfterOrderByStartDesc(any(), any()))
-                .thenReturn(of(booking));
-        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(
-                userDto.getId(),
-                FUTURE.name(),
-                null,
-                null
-        );
+        when(bookingStorage.findBookingsByItemOwnerAndStartAfterOrderByStartDesc(any(), any())).thenReturn(of(booking));
+        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(userDto.getId(), FUTURE.name(), null, null);
+
         assertEquals(bookings.get(0).getId(), booking.getId());
         assertEquals(bookings.size(), 1);
     }
@@ -496,14 +421,9 @@ class BookingServiceTest {
     @Test
     void getBookingsByOwnerIdRejectStateTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByItemOwnerIsAndStatusIsOrderByStartDesc(any(), any()))
-                .thenReturn(of(booking));
-        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(
-                userDto.getId(),
-                REJECTED.name(),
-                null,
-                null
-        );
+        when(bookingStorage.findBookingsByItemOwnerIsAndStatusIsOrderByStartDesc(any(), any())).thenReturn(of(booking));
+        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(userDto.getId(), REJECTED.name(), null, null);
+
         assertEquals(bookings.get(0).getId(), booking.getId());
         assertEquals(bookings.size(), 1);
     }
@@ -511,37 +431,26 @@ class BookingServiceTest {
     @Test
     void getBookingsByOwnerIdCurrentStateTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByItemOwnerIsAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any()))
-                .thenReturn(of(booking));
-        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(
-                userDto.getId(),
-                CURRENT.name(),
-                null,
-                null
-        );
+        when(bookingStorage.findBookingsByItemOwnerIsAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any())).thenReturn(of(booking));
+        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(userDto.getId(), CURRENT.name(), null, null);
+
         assertEquals(bookings.get(0).getId(), booking.getId());
         assertEquals(bookings.size(), 1);
     }
 
     @Test
     void getBookingsByItemEmptyTest() {
-        when(bookingStorage.findBookingsByItem_IdAndItem_Owner_IdIsOrderByStart(anyLong(), anyLong()))
-                .thenReturn(of());
-        List<BookingAllDto> bookings = bookingService.getBookingsByItem(
-                1L,
-                2L
-        );
+        when(bookingStorage.findBookingsByItem_IdAndItem_Owner_IdIsOrderByStart(anyLong(), anyLong())).thenReturn(of());
+        List<BookingAllDto> bookings = bookingService.getBookingsByItem(1L, 2L);
+
         assertEquals(bookings.size(), 0);
     }
 
     @Test
     void getBookingsByItemTest() {
-        when(bookingStorage.findBookingsByItem_IdAndItem_Owner_IdIsOrderByStart(anyLong(), anyLong()))
-                .thenReturn(of(booking));
-        List<BookingAllDto> bookings = bookingService.getBookingsByItem(
-                1L,
-                2L
-        );
+        when(bookingStorage.findBookingsByItem_IdAndItem_Owner_IdIsOrderByStart(anyLong(), anyLong())).thenReturn(of(booking));
+        List<BookingAllDto> bookings = bookingService.getBookingsByItem(1L, 2L);
+
         assertEquals(bookings.get(0).getId(), booking.getId());
         assertEquals(bookings.size(), 1);
     }
@@ -549,42 +458,27 @@ class BookingServiceTest {
     @Test
     void getAllBookingsPaginationFutureTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByBookerIsAndStartIsAfterOrderByStartDesc(any(), any(), any()))
-                .thenReturn(empty());
-        List<BookingAllDto> bookings = bookingService.getAll(
-                userDto.getId(),
-                FUTURE.name(),
-                0,
-                2
-        );
+        when(bookingStorage.findBookingsByBookerIsAndStartIsAfterOrderByStartDesc(any(), any(), any())).thenReturn(empty());
+        List<BookingAllDto> bookings = bookingService.getAll(userDto.getId(), FUTURE.name(), 0, 2);
+
         assertEquals(bookings.size(), 0);
     }
 
     @Test
     void getAllBookingsPaginationAllTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByBookerIsOrderByStartDesc(any(), any()))
-                .thenReturn(empty());
-        List<BookingAllDto> bookings = bookingService.getAll(
-                userDto.getId(),
-                ALL.name(),
-                0,
-                2
-        );
+        when(bookingStorage.findBookingsByBookerIsOrderByStartDesc(any(), any())).thenReturn(empty());
+        List<BookingAllDto> bookings = bookingService.getAll(userDto.getId(), ALL.name(), 0, 2);
+
         assertEquals(bookings.size(), 0);
     }
 
     @Test
     void getAllBookingsPaginationPastTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByBookerIsAndEndBeforeOrderByStartDesc(any(), any(), any()))
-                .thenReturn(empty());
-        List<BookingAllDto> bookings = bookingService.getAll(
-                userDto.getId(),
-                PAST.name(),
-                0,
-                2
-        );
+        when(bookingStorage.findBookingsByBookerIsAndEndBeforeOrderByStartDesc(any(), any(), any())).thenReturn(empty());
+        List<BookingAllDto> bookings = bookingService.getAll(userDto.getId(), PAST.name(), 0, 2);
+
         assertEquals(bookings.size(), 0);
     }
 
@@ -593,102 +487,71 @@ class BookingServiceTest {
         saveBookingDto();
         when(bookingStorage.findBookingsByBookerIsAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any()))
                 .thenReturn(empty());
-        List<BookingAllDto> bookings = bookingService.getAll(
-                userDto.getId(),
-                CURRENT.name(),
-                0,
-                2
-        );
+        List<BookingAllDto> bookings = bookingService.getAll(userDto.getId(), CURRENT.name(), 0, 2);
+
         assertEquals(bookings.size(), 0);
     }
 
     @Test
     void getAllBookingsPaginationAnyTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByBookerIsAndStatusIsOrderByStartDesc(any(), any(), any()))
-                .thenReturn(empty());
-        List<BookingAllDto> bookings = bookingService.getAll(
-                userDto.getId(),
-                CANCELED.name(),
-                0,
-                2
-        );
+        when(bookingStorage.findBookingsByBookerIsAndStatusIsOrderByStartDesc(any(), any(), any())).thenReturn(empty());
+        List<BookingAllDto> bookings = bookingService.getAll(userDto.getId(), CANCELED.name(), 0, 2);
+
         assertEquals(bookings.size(), 0);
     }
 
     @Test
     void getBookingsByOwnerIdPastTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByItemOwnerAndEndBeforeOrderByStartDesc(any(), any()))
-                .thenReturn(of());
-        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(
-                userDto.getId(),
-                PAST.name()
-        );
+        when(bookingStorage.findBookingsByItemOwnerAndEndBeforeOrderByStartDesc(any(), any())).thenReturn(of());
+        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(userDto.getId(), PAST.name());
+
         assertEquals(bookings.size(), 0);
     }
 
     @Test
     void getBookingsByOwnerIdCurrentTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByItemOwnerIsAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any()))
-                .thenReturn(of());
-        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(
-                userDto.getId(),
-                CURRENT.name()
-        );
+        when(bookingStorage.findBookingsByItemOwnerIsAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any())).thenReturn(of());
+        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(userDto.getId(), CURRENT.name());
+
         assertEquals(bookings.size(), 0);
     }
 
     @Test
     void getBookingsByOwnerIdFutureTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByItemOwnerAndStartAfterOrderByStartDesc(any(), any()))
-                .thenReturn(of());
-        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(
-                userDto.getId(),
-                FUTURE.name()
-        );
+        when(bookingStorage.findBookingsByItemOwnerAndStartAfterOrderByStartDesc(any(), any())).thenReturn(of());
+        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(userDto.getId(), FUTURE.name());
+
         assertEquals(bookings.size(), 0);
     }
 
     @Test
     void getBookingsByOwnerIdAnyTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByItemOwnerIsAndStatusIsOrderByStartDesc(any(), any()))
-                .thenReturn(of());
-        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(
-                userDto.getId(),
-                CANCELED.name()
-        );
+        when(bookingStorage.findBookingsByItemOwnerIsAndStatusIsOrderByStartDesc(any(), any())).thenReturn(of());
+        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(userDto.getId(), CANCELED.name());
+
         assertEquals(bookings.size(), 0);
     }
 
     @Test
     void getBookingsByOwnerIdPaginationNotNullTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByItemOwnerIsOrderByStartDesc(any(), any()))
-                .thenReturn(empty());
-        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(
-                userDto.getId(),
-                ALL.name(),
-                0,
-                2
-        );
+        when(bookingStorage.findBookingsByItemOwnerIsOrderByStartDesc(any(), any())).thenReturn(empty());
+        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(userDto.getId(), ALL.name(), 0, 2);
+
         assertEquals(bookings.size(), 0);
     }
 
     @Test
     void getBookingsByOwnerIdPaginationPastTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByItemOwnerAndEndBeforeOrderByStartDesc(any(), any(), any()))
-                .thenReturn(empty());
-        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(
-                userDto.getId(),
-                PAST.name(),
-                0,
-                2
-        );
+        when(bookingStorage.findBookingsByItemOwnerAndEndBeforeOrderByStartDesc(any(), any(), any())).thenReturn(empty());
+        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(userDto.getId(), PAST.name(), 0, 2);
+
         assertEquals(bookings.size(), 0);
     }
 
@@ -697,88 +560,62 @@ class BookingServiceTest {
         saveBookingDto();
         when(bookingStorage.findBookingsByItemOwnerIsAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any(), any()))
                 .thenReturn(empty());
-        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(
-                userDto.getId(),
-                CURRENT.name(),
-                0,
-                2
-        );
+        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(userDto.getId(), CURRENT.name(), 0, 2);
+
         assertEquals(bookings.size(), 0);
     }
 
     @Test
     void getBookingsByOwnerIdPaginationFutureTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByItemOwnerAndStartAfterOrderByStartDesc(any(), any(), any()))
-                .thenReturn(empty());
-        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(
-                userDto.getId(),
-                FUTURE.name(),
-                0,
-                2
-        );
+        when(bookingStorage.findBookingsByItemOwnerAndStartAfterOrderByStartDesc(any(), any(), any())).thenReturn(empty());
+        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(userDto.getId(), FUTURE.name(), 0, 2);
+
         assertEquals(bookings.size(), 0);
     }
 
     @Test
     void getBookingsByOwnerIdPaginationAnyTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByItemOwnerIsAndStatusIsOrderByStartDesc(any(), any(), any()))
-                .thenReturn(empty());
-        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(
-                userDto.getId(),
-                CANCELED.name(),
-                0,
-                2
-        );
+        when(bookingStorage.findBookingsByItemOwnerIsAndStatusIsOrderByStartDesc(any(), any(), any())).thenReturn(empty());
+        List<BookingAllDto> bookings = bookingService.getBookingsByOwner(userDto.getId(), CANCELED.name(), 0, 2);
+
         assertEquals(bookings.size(), 0);
     }
 
     @Test
     void getAllBookingsAllTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByBookerIsOrderByStartDesc(any()))
-                .thenReturn(of());
-        List<BookingAllDto> bookings = bookingService.getAll(
-                userDto.getId(),
-                ALL.name()
-        );
+        when(bookingStorage.findBookingsByBookerIsOrderByStartDesc(any())).thenReturn(of());
+        List<BookingAllDto> bookings = bookingService.getAll(userDto.getId(), ALL.name());
+
         assertEquals(bookings.size(), 0);
     }
 
     @Test
     void getAllBookingsCurrentTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByBookerIsAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any()))
-                .thenReturn(of());
-        List<BookingAllDto> bookings = bookingService.getAll(
-                userDto.getId(),
-                CURRENT.name()
-        );
+        when(bookingStorage.findBookingsByBookerIsAndStartBeforeAndEndAfterOrderByStartDesc(any(), any(), any())).thenReturn(of());
+        List<BookingAllDto> bookings = bookingService.getAll(userDto.getId(), CURRENT.name());
+
         assertEquals(bookings.size(), 0);
     }
 
     @Test
     void getAllBookingsFutureTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByBookerIsAndStartIsAfterOrderByStartDesc(any(), any()))
-                .thenReturn(of());
-        List<BookingAllDto> bookings = bookingService.getAll(
-                userDto.getId(),
-                FUTURE.name()
-        );
+        when(bookingStorage.findBookingsByBookerIsAndStartIsAfterOrderByStartDesc(any(), any())).thenReturn(of());
+        List<BookingAllDto> bookings = bookingService.getAll(userDto.getId(), FUTURE.name());
+
         assertEquals(bookings.size(), 0);
     }
 
     @Test
     void getAllBookingsAnyTest() {
         saveBookingDto();
-        when(bookingStorage.findBookingsByBookerIsAndStatusIsOrderByStartDesc(any(), any()))
-                .thenReturn(of());
-        List<BookingAllDto> bookings = bookingService.getAll(
-                userDto.getId(),
-                CANCELED.name()
-        );
+        when(bookingStorage.findBookingsByBookerIsAndStatusIsOrderByStartDesc(any(), any())).thenReturn(of());
+        List<BookingAllDto> bookings = bookingService.getAll(userDto.getId(), CANCELED.name());
+
         assertEquals(bookings.size(), 0);
     }
 }

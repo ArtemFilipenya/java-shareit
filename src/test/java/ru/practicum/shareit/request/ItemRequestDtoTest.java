@@ -1,13 +1,15 @@
-package ru.practicum.shareit.request.dto;
+package ru.practicum.shareit.request;
 
-import org.springframework.boot.test.autoconfigure.json.JsonTest;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.json.JacksonTester;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.json.JsonTest;
+import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
+import ru.practicum.shareit.request.dto.ItemRequestDto;
+
+import static java.time.LocalDateTime.now;
+import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
-import static java.time.LocalDateTime.*;
-import static java.util.List.*;
 
 @JsonTest
 class ItemRequestDtoTest {

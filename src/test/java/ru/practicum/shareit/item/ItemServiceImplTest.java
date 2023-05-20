@@ -1,35 +1,34 @@
-package ru.practicum.shareit.item.service;
+package ru.practicum.shareit.item;
 
-import ru.practicum.shareit.booking.dto.BookingControllerDto;
-import ru.practicum.shareit.errors.exception.ObjectNotFoundException;
-import ru.practicum.shareit.item.dto.ItemAllDto;
-import ru.practicum.shareit.request.service.ItemRequestService;
+import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import ru.practicum.shareit.booking.dto.BookingControllerDto;
 import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.request.dto.ItemRequestDto;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.errors.exception.ObjectNotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.dto.ItemAllDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
-import org.junit.jupiter.api.BeforeEach;
-import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.Test;
+import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.service.ItemRequestService;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.service.UserService;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
-
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static java.time.LocalDateTime.now;
+import static java.util.List.of;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.hamcrest.Matchers.equalTo;
-import static java.time.LocalDateTime.*;
 import static org.hamcrest.Matchers.*;
-import static java.util.List.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Transactional
 @SpringBootTest

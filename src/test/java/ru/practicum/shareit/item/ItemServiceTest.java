@@ -1,31 +1,33 @@
-package ru.practicum.shareit.item.service;
+package ru.practicum.shareit.item;
 
-import ru.practicum.shareit.errors.exception.BadParameterException;
-import ru.practicum.shareit.errors.exception.ObjectNotFoundException;
-import ru.practicum.shareit.item.mapper.ItemMapper;
-import ru.practicum.shareit.item.repository.CommentStorage;
-import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.item.repository.ItemStorage;
-import ru.practicum.shareit.user.service.UserService;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.model.Comment;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.model.Item;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.errors.exception.BadParameterException;
+import ru.practicum.shareit.errors.exception.ObjectNotFoundException;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.CommentStorage;
+import ru.practicum.shareit.item.repository.ItemStorage;
+import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.item.service.ItemServiceImpl;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.util.List;
 import java.util.Optional;
 
+import static java.time.LocalDateTime.now;
+import static java.util.List.of;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static java.time.LocalDateTime.now;
 import static org.mockito.Mockito.when;
-import static java.util.List.*;
 import static ru.practicum.shareit.user.mapper.UserMapper.convertDtoToModel;
 
 

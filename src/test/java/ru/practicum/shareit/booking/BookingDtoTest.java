@@ -1,33 +1,29 @@
-package ru.practicum.shareit.booking.dto;
+package ru.practicum.shareit.booking;
 
-import org.springframework.boot.test.autoconfigure.json.JsonTest;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
+import ru.practicum.shareit.booking.dto.BookingAllDto;
+import ru.practicum.shareit.booking.dto.BookingControllerDto;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.item.dto.ItemShortDto;
-import org.junit.jupiter.api.Test;
 import ru.practicum.shareit.user.dto.UserShortDto;
 
 import java.time.LocalDateTime;
 
-import static ru.practicum.shareit.enums.Status.WAITING;
-import static org.assertj.core.api.Assertions.assertThat;
 import static java.time.LocalDateTime.of;
-import static java.time.Month.DECEMBER;
+import static java.time.Month.OCTOBER;
+import static org.assertj.core.api.Assertions.assertThat;
+import static ru.practicum.shareit.enums.Status.WAITING;
 
 @JsonTest
 class BookingDtoTest {
     private final ItemShortDto itemDto = new ItemShortDto(1L, "Pen");
-    private final LocalDateTime startTime = of(2000, DECEMBER, 3, 0, 5, 10);
-    private final LocalDateTime endTime = of(2000, DECEMBER, 5, 0, 5, 10);
+    private final LocalDateTime startTime = of(1999, OCTOBER, 3, 0, 5, 10);
+    private final LocalDateTime endTime = of(2000, OCTOBER, 5, 0, 5, 10);
     private final UserShortDto userDto = new UserShortDto(1L, "Lora");
-    @Autowired
-    private JacksonTester<BookingAllDto> bookingAllFieldsDtoJacksonTester;
-    @Autowired
-    private JacksonTester<BookingControllerDto> bookingSavingDtoJacksonTester;
-    @Autowired
-    private JacksonTester<BookingDto> bookingDtoJacksonTester;
-
     private final BookingAllDto bookingAllFieldsDto = BookingAllDto.builder()
             .id(1L)
             .start(startTime)
@@ -36,7 +32,6 @@ class BookingDtoTest {
             .booker(userDto)
             .status(WAITING)
             .build();
-
     private final BookingControllerDto bookingSavingDto = BookingControllerDto.builder()
             .id(1L)
             .start(startTime)
@@ -45,11 +40,16 @@ class BookingDtoTest {
             .booker(1L)
             .status(WAITING.name())
             .build();
-
     private final BookingDto bookingDto = BookingDto.builder()
             .id(1L)
             .bookerId(1L)
             .build();
+    @Autowired
+    private JacksonTester<BookingAllDto> bookingAllFieldsDtoJacksonTester;
+    @Autowired
+    private JacksonTester<BookingControllerDto> bookingSavingDtoJacksonTester;
+    @Autowired
+    private JacksonTester<BookingDto> bookingDtoJacksonTester;
 
     @Test
     void bookingDtoJacksonTesterTest() throws Exception {

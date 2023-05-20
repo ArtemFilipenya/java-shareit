@@ -21,24 +21,19 @@ import static javax.persistence.GenerationType.IDENTITY;
 @AllArgsConstructor
 @Table(name = "bookings")
 public class Booking {
+    @Enumerated(STRING)
+    Status status;
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
-
     @Column(name = "start_date", nullable = false)
     private LocalDateTime start;
-
     @Column(name = "end_date", nullable = false)
     private LocalDateTime end;
-
     @ManyToOne
     @JoinColumn(name = "item_id", nullable = false)
     private Item item;
-
     @ManyToOne
     @JoinColumn(name = "booker_id", nullable = false)
     private User booker;
-
-    @Enumerated(STRING)
-    Status status;
 }

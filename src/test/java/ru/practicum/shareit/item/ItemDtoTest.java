@@ -1,15 +1,18 @@
-package ru.practicum.shareit.item.dto;
+package ru.practicum.shareit.item;
 
-import org.springframework.boot.test.autoconfigure.json.JsonTest;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import org.junit.jupiter.api.Test;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.ItemAllDto;
+import ru.practicum.shareit.item.dto.ItemDto;
 
+import static java.time.LocalDateTime.now;
+import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
-import static java.time.LocalDateTime.*;
-import static java.util.List.*;
 
 @JsonTest
 class ItemDtoTest {

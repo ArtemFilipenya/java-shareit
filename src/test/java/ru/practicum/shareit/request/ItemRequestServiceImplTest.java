@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request.service;
+package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Assertions;
@@ -9,16 +9,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.practicum.shareit.errors.exception.ObjectNotFoundException;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
-
 import java.util.List;
 
 import static java.time.LocalDateTime.now;
-import static java.util.List.*;
+import static java.util.List.of;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
@@ -36,32 +36,14 @@ class ItemRequestServiceImplTest {
 
     @BeforeEach
     void initialize() {
-        UserDto userDto = new UserDto(null, "John", "john@mail.com");
+        UserDto userDto = new UserDto(null, "Artem", "artem@mail.com");
         user = userService.save(userDto);
-        itemRequestDto = new ItemRequestDto(
-                1L,
-                "description",
-                user.getId(),
-                now(),
-                of()
-        );
+        itemRequestDto = new ItemRequestDto(1L, "des", user.getId(), now(), of());
     }
 
     private void saveItemRequests() {
-        ItemRequestDto itemRequestDto1 = new ItemRequestDto(
-                1L,
-                "happy clown",
-                user.getId(),
-                now(),
-                of()
-        );
-        ItemRequestDto itemRequestDto2 = new ItemRequestDto(
-                2L,
-                "sad clown",
-                user.getId(),
-                now(),
-                of()
-        );
+        ItemRequestDto itemRequestDto1 = new ItemRequestDto(1L, "happy", user.getId(), now(), of());
+        ItemRequestDto itemRequestDto2 = new ItemRequestDto(2L, "sad", user.getId(), now(), of());
         itemRequestService.save(itemRequestDto1, user.getId());
         itemRequestService.save(itemRequestDto2, user.getId());
     }
@@ -70,7 +52,7 @@ class ItemRequestServiceImplTest {
     void saveItemRequestUserNotFoundTest() {
         final long id = 57L;
         Exception exception = assertThrows(ObjectNotFoundException.class, () -> itemRequestService.save(itemRequestDto, id));
-        Assertions.assertEquals("Пользователь с id = " + id + " не найден", exception.getMessage());
+        Assertions.assertEquals("Item not found", exception.getMessage());
     }
 
     @Test
@@ -83,19 +65,6 @@ class ItemRequestServiceImplTest {
         assertThat(itemRequest.getRequester().getId(), equalTo(itemRequestDto.getRequesterId()));
         assertThat(itemRequest.getDescription(), equalTo(itemRequestDto.getDescription()));
         assertThat(itemRequest.getId(), notNullValue());
-    }
-
-    @Test
-    void getItemRequestByIdTest() {
-        itemRequestService.save(itemRequestDto, user.getId());
-        ItemRequest itemRequest = entityManager.createQuery(
-                "SELECT itemRequest " +
-                        "FROM ItemRequest itemRequest",
-                ItemRequest.class).getSingleResult();
-        ItemRequestDto itemRequestById = itemRequestService.getItemRequestById(itemRequest.getId(), user.getId());
-        assertThat(itemRequestById.getRequesterId(), equalTo(itemRequest.getRequester().getId()));
-        assertThat(itemRequestById.getDescription(), equalTo(itemRequest.getDescription()));
-        assertThat(itemRequestById.getId(), equalTo(itemRequest.getId()));
     }
 
     @Test
@@ -112,6 +81,19 @@ class ItemRequestServiceImplTest {
                 .getResultList();
         assertThat(allItemRequests.get(0).getId(), equalTo(itemRequests.get(0).getId()));
         assertThat(allItemRequests.size(), equalTo(itemRequests.size()));
+    }
+
+    @Test
+    void getItemRequestByIdTest() {
+        itemRequestService.save(itemRequestDto, user.getId());
+        ItemRequest itemRequest = entityManager.createQuery(
+                "SELECT itemRequest " +
+                        "FROM ItemRequest itemRequest",
+                ItemRequest.class).getSingleResult();
+        ItemRequestDto itemRequestById = itemRequestService.getItemRequestById(itemRequest.getId(), user.getId());
+        assertThat(itemRequestById.getRequesterId(), equalTo(itemRequest.getRequester().getId()));
+        assertThat(itemRequestById.getDescription(), equalTo(itemRequest.getDescription()));
+        assertThat(itemRequestById.getId(), equalTo(itemRequest.getId()));
     }
 
     @Test
@@ -133,12 +115,7 @@ class ItemRequestServiceImplTest {
     @Test
     void getAllItemRequests2Test() {
         saveItemRequests();
-        UserDto userDto = userService.save(
-                new UserDto(
-                        null,
-                        "Clare",
-                        "clare@mail.com")
-        );
+        UserDto userDto = userService.save(new UserDto(null, "Tom", "tom@mail.com"));
         List<ItemRequestDto> allItemRequests = itemRequestService.getAllItemRequests(null, null, userDto.getId());
         List<ItemRequest> itemRequests = entityManager.createQuery(
                         "SELECT itemRequest " +
