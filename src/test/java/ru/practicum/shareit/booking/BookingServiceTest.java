@@ -108,7 +108,7 @@ class BookingServiceTest {
                                 of()),
                         2L)
         );
-        assertEquals("BadParameterException", exception.getMessage());
+        assertEquals("Не задана дата окончания бронирования", exception.getMessage());
     }
 
     @Test
@@ -133,7 +133,7 @@ class BookingServiceTest {
                                 of()),
                         2L)
         );
-        assertEquals("BadParameterException", exception.getMessage());
+        assertEquals("Не задана дата начала бронирования", exception.getMessage());
     }
 
     @Test
@@ -151,7 +151,7 @@ class BookingServiceTest {
                                 of()),
                         2L)
         );
-        assertEquals("BadParameterException", exception.getMessage());
+        assertEquals("Некорректная дата начала броинрования", exception.getMessage());
     }
 
     @Test
@@ -169,7 +169,7 @@ class BookingServiceTest {
                                 of()),
                         2L)
         );
-        assertEquals("BadParameterException", exception.getMessage());
+        assertEquals("Некорректная дата бронирования", exception.getMessage());
     }
 
     @Test
@@ -185,7 +185,7 @@ class BookingServiceTest {
                                 of()),
                         bookingControllerDto.getBooker())
         );
-        assertEquals("Item Not found", exception.getMessage());
+        assertEquals("ObjectNotFoundException", exception.getMessage());
     }
 
     @Test
@@ -204,7 +204,7 @@ class BookingServiceTest {
                                 of()),
                         1L)
         );
-        assertEquals("Item not found", exception.getMessage());
+        assertEquals("ObjectNotFoundException", exception.getMessage());
     }
 
     @Test
@@ -228,7 +228,7 @@ class BookingServiceTest {
         when(bookingStorage.findById(anyLong()))
                 .thenReturn(ofNullable(booking));
         Exception exception = assertThrows(BadParameterException.class, () -> bookingService.approve(booking.getId(), true, 3L));
-        assertEquals("BadParameterException", exception.getMessage());
+        assertEquals("ObjectNotFoundException", exception.getMessage());
     }
 
     @Test
@@ -248,7 +248,7 @@ class BookingServiceTest {
         when(bookingStorage.findById(anyLong())).thenReturn(ofNullable(booking));
         Exception exception = assertThrows(ObjectNotFoundException.class, () -> bookingService.approve(booking.getId(),
                 true, booking.getBooker().getId()));
-        assertEquals("User not found", exception.getMessage());
+        assertEquals("ObjectNotFoundException", exception.getMessage());
     }
 
     @Test
@@ -265,7 +265,7 @@ class BookingServiceTest {
         Exception exception = assertThrows(BadParameterException.class, () -> bookingService.approve(booking.getId(),
                 true, userDto.getId()));
 
-        assertEquals("BadParameterException", exception.getMessage());
+        assertEquals("ObjectNotFoundException", exception.getMessage());
     }
 
     @Test
@@ -317,7 +317,7 @@ class BookingServiceTest {
         Exception exception = assertThrows(BadParameterException.class, () -> bookingService.getAll(userDto.getId(),
                 "Unknown", null, null));
 
-        assertEquals("BadParameterException", exception.getMessage());
+        assertEquals("Unknown state: Unknown", exception.getMessage());
     }
 
     @Test

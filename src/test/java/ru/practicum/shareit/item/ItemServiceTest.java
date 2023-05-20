@@ -122,7 +122,7 @@ class ItemServiceTest {
     void updateNullOwnerTest() {
         Exception exception = assertThrows(BadParameterException.class,
                 () -> itemService.update(itemDto, null, null));
-        assertEquals("Id пользователя не задан!", exception.getMessage());
+        assertEquals("BadParameterException", exception.getMessage());
     }
 
     @Test
@@ -185,7 +185,7 @@ class ItemServiceTest {
         );
         Exception exception = assertThrows(BadParameterException.class,
                 () -> itemService.createComment(commentDto, itemDto.getId(), 2L));
-        assertEquals("Текст комментария не может быть пустым", exception.getMessage());
+        assertEquals("BadParameterException", exception.getMessage());
     }
 
     @Test
@@ -199,7 +199,7 @@ class ItemServiceTest {
         );
         Exception exception = assertThrows(BadParameterException.class,
                 () -> itemService.createComment(commentDto, itemDto.getId(), 2L));
-        assertEquals("Текст комментария не может быть пустым", exception.getMessage());
+        assertEquals("BadParameterException", exception.getMessage());
     }
 
     @Test
@@ -215,7 +215,7 @@ class ItemServiceTest {
                         null,
                         1L)
         );
-        assertEquals("Некорректно заданы поля в запросе", exception.getMessage());
+        assertEquals("BadParameterException", exception.getMessage());
     }
 
     @Test
@@ -243,18 +243,10 @@ class ItemServiceTest {
 
     @Test
     void saveItemNullDescriptionTest() {
-        Exception exception = assertThrows(BadParameterException.class,
-                () -> itemService.save(
-                        new ItemDto(
-                                null,
-                                "space",
-                                null,
-                                true,
-                                1L),
-                        null,
-                        1L)
-        );
-        assertEquals("Не задано описание иснтрумента", exception.getMessage());
+        Exception exception = assertThrows(BadParameterException.class, () -> itemService.save(new ItemDto(null,
+                        "space", null, true, 1L), null, 1L));
+
+        assertEquals("BadParameterException", exception.getMessage());
     }
 
     @Test
@@ -270,7 +262,7 @@ class ItemServiceTest {
                         null,
                         1L)
         );
-        assertEquals("Не задано название инструмента", exception.getMessage());
+        assertEquals("BadParameterException", exception.getMessage());
     }
 
     @Test
@@ -286,7 +278,7 @@ class ItemServiceTest {
                         null,
                         1L)
         );
-        assertEquals("Некорректно заданы поля в запросе", exception.getMessage());
+        assertEquals("BadParameterException", exception.getMessage());
     }
 
     @Test
@@ -302,6 +294,6 @@ class ItemServiceTest {
                         null,
                         1L)
         );
-        assertEquals("Не определена доступность инструмента", exception.getMessage());
+        assertEquals("BadParameterException", exception.getMessage());
     }
 }

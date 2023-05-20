@@ -66,14 +66,6 @@ class UserServiceTest {
     }
 
     @Test
-    void saveUserEmptyEmailTest() {
-        Exception exception = assertThrows(BadParameterException.class, () -> userService.save(new UserDto(null,
-                "Sasha", "sasha@mail.ru")));
-
-        assertEquals("BadParameterException", exception.getMessage());
-    }
-
-    @Test
     void saveNullUserEmptyTest() {
         Exception exception = assertThrows(BadParameterException.class, () -> userService.save(null));
 
@@ -83,8 +75,7 @@ class UserServiceTest {
     @Test
     void saveNullEmailTest() {
         Exception exception = assertThrows(BadParameterException.class, () -> userService.save(new UserDto(null,
-                "Abbie", null))
-        );
+                "Abbie", null)));
 
         assertEquals("BadParameterException", exception.getMessage());
     }

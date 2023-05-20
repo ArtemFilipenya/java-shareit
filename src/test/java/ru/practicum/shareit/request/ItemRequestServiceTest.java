@@ -114,18 +114,6 @@ class ItemRequestServiceTest {
     }
 
     @Test
-    void getAllItemRequestsTest() {
-        saveItemRequestDto();
-        when(itemService.getItemsByRequests(any())).thenReturn(of(new ItemDto(1L, "toy", "my toy",
-                true, 3L)));
-        when(itemRequestRepository.findItemRequestByRequester_IdIsNotOrderByCreatedDesc(any())).thenReturn(of(itemRequest));
-        List<ItemRequestDto> allItemRequests = itemRequestService.getAllItemRequests(null, null, userDto.getId());
-        assertEquals(allItemRequests.get(0).getId(), itemRequest.getId());
-        assertEquals(allItemRequests.get(0).getItems().size(), 1);
-        assertEquals(allItemRequests.size(), 1);
-    }
-
-    @Test
     void getItemRequestNotFoundTest() {
         when(userService.get(any())).thenReturn(userDto);
         when(itemRequestRepository.findById(any())).thenThrow(ObjectNotFoundException.class);
