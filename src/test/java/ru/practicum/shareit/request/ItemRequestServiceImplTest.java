@@ -52,7 +52,7 @@ class ItemRequestServiceImplTest {
     void saveItemRequestUserNotFoundTest() {
         final long id = 57L;
         Exception exception = assertThrows(ObjectNotFoundException.class, () -> itemRequestService.save(itemRequestDto, id));
-        Assertions.assertEquals("User not found", exception.getMessage());
+        Assertions.assertEquals("User with id= 57 not found", exception.getMessage());
     }
 
     @Test

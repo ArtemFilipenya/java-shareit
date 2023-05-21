@@ -44,7 +44,7 @@ class UserServiceTest {
     void saveUserNullEmailTest() {
         Exception exception = assertThrows(BadParameterException.class, () -> userService.save(new UserDto(null,
                 "Molly", null)));
-        assertEquals("BadParameterException", exception.getMessage());
+        assertEquals("Email cannot be empty", exception.getMessage());
     }
 
     @Test
@@ -69,7 +69,7 @@ class UserServiceTest {
     void saveNullUserEmptyTest() {
         Exception exception = assertThrows(BadParameterException.class, () -> userService.save(null));
 
-        assertEquals("BadParameterException", exception.getMessage());
+        assertEquals("An invalid parameter was passed when creating a user", exception.getMessage());
     }
 
     @Test
@@ -77,7 +77,7 @@ class UserServiceTest {
         Exception exception = assertThrows(BadParameterException.class, () -> userService.save(new UserDto(null,
                 "Abbie", null)));
 
-        assertEquals("BadParameterException", exception.getMessage());
+        assertEquals("Email cannot be empty", exception.getMessage());
     }
 
     @Test
@@ -154,14 +154,14 @@ class UserServiceTest {
     void getUserNullTest() {
         Exception exception = assertThrows(BadParameterException.class, () -> userService.get(null));
 
-        assertEquals("BadParameterException", exception.getMessage());
+        assertEquals("Id cannot be empty", exception.getMessage());
     }
 
     @Test
     void deleteUserNullIdTest() {
         Exception exception = assertThrows(BadParameterException.class, () -> userService.delete(null));
 
-        assertEquals("BadParameterException", exception.getMessage());
+        assertEquals("Id cannot be empty", exception.getMessage());
     }
 
     @Test

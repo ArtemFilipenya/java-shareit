@@ -12,7 +12,6 @@ import ru.practicum.shareit.user.service.UserService;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
-
 @RestController
 @Slf4j
 @RequestMapping(path = "/users")
@@ -29,25 +28,25 @@ public class UserController {
     @PatchMapping("/{userId}")
     public UserDto update(@RequestBody @Validated(Update.class) UserDto user,
                           @PathVariable Long userId) {
-        log.info("UserController.update()");
+        log.info("UserController.update(userId:{})", userId);
         return userService.update(user, userId);
     }
 
     @PostMapping()
     public UserDto create(@RequestBody @Validated(Create.class) UserDto user) {
-        log.info("UserController.create()");
+        log.info("UserController.create(userDto:{})", user);
         return userService.save(user);
     }
 
     @DeleteMapping("/{userId}")
     public void delete(@PathVariable Long userId) {
-        log.info("UserController.delete()");
+        log.info("UserController.delete(userId:{})", userId);
         userService.delete(userId);
     }
 
     @GetMapping("/{userId}")
     public UserDto get(@PathVariable @NotNull Long userId) {
-        log.info("UserController.get()");
+        log.info("UserController.get(userId:{})", userId);
         return userService.get(userId);
     }
 }

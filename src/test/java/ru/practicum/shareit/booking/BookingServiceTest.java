@@ -185,7 +185,7 @@ class BookingServiceTest {
                                 of()),
                         bookingControllerDto.getBooker())
         );
-        assertEquals("ObjectNotFoundException", exception.getMessage());
+        assertEquals("The item with id= 1 cannot be rented", exception.getMessage());
     }
 
     @Test
@@ -204,7 +204,7 @@ class BookingServiceTest {
                                 of()),
                         1L)
         );
-        assertEquals("ObjectNotFoundException", exception.getMessage());
+        assertEquals("The item with id= 1 cannot be rented", exception.getMessage());
     }
 
     @Test
@@ -220,7 +220,7 @@ class BookingServiceTest {
                                 of()),
                         2L)
         );
-        assertEquals("BadParameterException", exception.getMessage());
+        assertEquals("Item with id= 2 already rented", exception.getMessage());
     }
 
     @Test
@@ -228,7 +228,7 @@ class BookingServiceTest {
         when(bookingStorage.findById(anyLong()))
                 .thenReturn(ofNullable(booking));
         Exception exception = assertThrows(BadParameterException.class, () -> bookingService.approve(booking.getId(), true, 3L));
-        assertEquals("ObjectNotFoundException", exception.getMessage());
+        assertEquals("Booking cannot be updated", exception.getMessage());
     }
 
     @Test
@@ -248,7 +248,7 @@ class BookingServiceTest {
         when(bookingStorage.findById(anyLong())).thenReturn(ofNullable(booking));
         Exception exception = assertThrows(ObjectNotFoundException.class, () -> bookingService.approve(booking.getId(),
                 true, booking.getBooker().getId()));
-        assertEquals("ObjectNotFoundException", exception.getMessage());
+        assertEquals("The user with id= 2 cannot approve", exception.getMessage());
     }
 
     @Test
@@ -265,7 +265,7 @@ class BookingServiceTest {
         Exception exception = assertThrows(BadParameterException.class, () -> bookingService.approve(booking.getId(),
                 true, userDto.getId()));
 
-        assertEquals("ObjectNotFoundException", exception.getMessage());
+        assertEquals("Booking cannot be updated", exception.getMessage());
     }
 
     @Test

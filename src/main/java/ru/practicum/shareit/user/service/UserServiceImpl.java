@@ -29,7 +29,6 @@ public class UserServiceImpl implements UserService {
         this.userStorage = userStorage;
     }
 
-
     @Override
     public List<UserDto> findAll() {
         return userStorage.findAll()
@@ -41,7 +40,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserDto update(UserDto userDto, Long id) {
-        User user = userStorage.findById(id).orElseThrow(() -> new ObjectNotFoundException("User not found"));
+        User user = userStorage.findById(id).orElseThrow(() -> new ObjectNotFoundException("User with id= " + id + " not found"));
 
         if (userDto.getName() != null) {
             user.setName(userDto.getName());
@@ -73,9 +72,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto get(Long id) {
         if (id == null) {
-            throw new BadParameterException("BadParameterException");
+            throw new BadParameterException("Id cannot be empty");
         }
-        User user = userStorage.findById(id).orElseThrow(() -> new ObjectNotFoundException("User not found"));
+        User user = userStorage.findById(id).orElseThrow(() -> new ObjectNotFoundException("User with id= " + id + " not found"));
 
         return UserMapper.convertModelToDto(user);
     }
@@ -84,18 +83,18 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void delete(Long id) {
         if (id == null) {
-            throw new BadParameterException("BadParameterException");
+            throw new BadParameterException("Id cannot be empty");
         }
         userStorage.deleteById(id);
     }
 
     private void checkToValid(UserDto user) {
         if (user == null) {
-            throw new BadParameterException("BadParameterException");
+            throw new BadParameterException("An invalid parameter was passed when creating a user");
         } else if (user.getEmail() == null) {
-            throw new BadParameterException("BadParameterException");
+            throw new BadParameterException("Email cannot be empty");
         } else if (isValidEmailAddress(user.getEmail())) {
-            throw new BadParameterException("BadParameterException");
+            throw new BadParameterException("Email is not valid");
         }
     }
 

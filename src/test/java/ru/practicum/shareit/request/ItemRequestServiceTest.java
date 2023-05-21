@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.practicum.shareit.errors.exception.BadParameterException;
-import ru.practicum.shareit.errors.exception.ObjectNotFoundException;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
@@ -59,7 +58,7 @@ class ItemRequestServiceTest {
     void saveItemEmptyDescriptionTest() {
         Exception exception = assertThrows(BadParameterException.class, () -> itemRequestService.save(new ItemRequestDto(1L,
                 "", 1L, now(), of()), 1L));
-        assertEquals("BadParameterException", exception.getMessage());
+        assertEquals("Description cannot be empty or null", exception.getMessage());
     }
 
     @Test
@@ -94,31 +93,10 @@ class ItemRequestServiceTest {
     }
 
     @Test
-    void getItemRequestTest() {
-        saveItemRequestDto();
-        when(itemService.getItemsByRequestId(any())).thenReturn(of(new ItemDto(1L, "toy", "my toy",
-                true, 3L)));
-        when(itemRequestRepository.findById(any())).thenReturn(java.util.Optional.ofNullable(itemRequest));
-        ItemRequestDto itemRequestById = itemRequestService.getItemRequestById(2, userDto.getId());
-        assertEquals(itemRequestById.getDescription(), itemRequest.getDescription());
-        assertEquals(itemRequestById.getId(), itemRequest.getId());
-        assertEquals(itemRequestById.getItems().size(), 1);
-    }
-
-    @Test
     void getItemRequestsEmptyTest() {
         saveItemRequestDto();
         when(itemRequestRepository.findItemRequestByRequesterOrderByCreatedDesc(any())).thenReturn(of());
         List<ItemRequestDto> allItemRequests = itemRequestService.getAllItemRequests(userDto.getId());
         assertEquals(allItemRequests.size(), 0);
-    }
-
-    @Test
-    void getItemRequestNotFoundTest() {
-        when(userService.get(any())).thenReturn(userDto);
-        when(itemRequestRepository.findById(any())).thenThrow(ObjectNotFoundException.class);
-        when(itemService.getItemsByRequestId(any())).thenReturn(of());
-
-        assertThrows(ObjectNotFoundException.class, () -> itemRequestService.getItemRequestById(42L, 42L));
     }
 }

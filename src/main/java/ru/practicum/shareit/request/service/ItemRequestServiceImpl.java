@@ -3,6 +3,7 @@ package ru.practicum.shareit.request.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.errors.exception.BadParameterException;
@@ -53,30 +54,13 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         return ItemRequestMapper.convertModelToDto(requestForSave);
     }
 
+
     @Override
     public List<ItemRequestDto> getAllItemRequests(Integer from, Integer size, Long userId) {
-        List<ItemRequest> requests;
-        if (from == null) {
-            from = 0;
-        }
-        if (size == null) {
-            size = 10;
-        }
-        PageRequest pageRequest = createPageRequest(from, size, Sort.by("created").descending());
-        if (pageRequest == null) {
-            requests = itemRequestStorage.findItemRequestByRequester_IdIsNotOrderByCreatedDesc(userId);
-        } else {
-            requests = itemRequestStorage.findItemRequestByRequester_IdIsNotOrderByCreatedDesc(userId, pageRequest)
-                    .stream()
-                    .collect(Collectors.toList());
-        }
+        List<ItemRequest> requests = getItemRequests(from, size, userId);
         List<ItemDto> items = itemService.getItemsByRequests(requests);
-        return requests
-                .stream()
-                .map(itemRequest -> ItemRequestMapper.convertModelToDto(itemRequest, items))
-                .collect(Collectors.toList());
+        return mapToItemRequestDto(requests, items);
     }
-
 
     @Override
     public List<ItemRequestDto> getAllItemRequests(Long userId) {
@@ -96,16 +80,60 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         User owner = UserMapper.convertDtoToModel(userService.get(userId));
         if (owner != null) {
             List<ItemDto> items = itemService.getItemsByRequestId(requestId);
-            ItemRequest itemRequest = itemRequestStorage.findById(requestId).orElseThrow(() -> new ObjectNotFoundException("ObjectNotFoundException"));
+            ItemRequest itemRequest = itemRequestStorage.findItemRequestById(requestId);
+
+            if (itemRequest == null) {
+                throw new ObjectNotFoundException("Request with id= " + requestId + " not found");
+            }
             return ItemRequestMapper.convertModelToDto(itemRequest, items);
         } else {
-            throw new ObjectNotFoundException("ObjectNotFoundException");
+            throw new ObjectNotFoundException("User with id= " + userId + " not found");
         }
+    }
+
+    @Override
+    public List<ItemRequestDto> getAllItemRequests(Pageable pageable, Long userId) {
+        List<ItemRequest> requests = getItemRequests(pageable, userId);
+        List<ItemDto> items = itemService.getItemsByRequests(requests);
+        return mapToItemRequestDto(requests, items);
+    }
+
+    private List<ItemRequest> getItemRequests(Pageable pageable, Long userId) {
+        if (pageable.isPaged()) {
+            return itemRequestStorage.findItemRequestByRequester_IdIsNotOrderByCreatedDesc(userId, pageable)
+                    .stream()
+                    .collect(Collectors.toList());
+        } else {
+            return itemRequestStorage.findItemRequestByRequester_IdIsNotOrderByCreatedDesc(userId);
+        }
+    }
+
+    private List<ItemRequest> getItemRequests(Integer from, Integer size, Long userId) {
+        if (from == null) {
+            from = 0;
+        }
+        if (size == null) {
+            size = 10;
+        }
+        PageRequest pageRequest = createPageRequest(from, size, Sort.by("created").descending());
+        if (pageRequest == null) {
+            return itemRequestStorage.findItemRequestByRequester_IdIsNotOrderByCreatedDesc(userId);
+        } else {
+            return itemRequestStorage.findItemRequestByRequester_IdIsNotOrderByCreatedDesc(userId, pageRequest)
+                    .stream()
+                    .collect(Collectors.toList());
+        }
+    }
+
+    private List<ItemRequestDto> mapToItemRequestDto(List<ItemRequest> requests, List<ItemDto> items) {
+        return requests.stream()
+                .map(itemRequest -> ItemRequestMapper.convertModelToDto(itemRequest, items))
+                .collect(Collectors.toList());
     }
 
     private void checkToValid(ItemRequestDto itemRequestDto) {
         if (itemRequestDto.getDescription() == null || itemRequestDto.getDescription().isBlank()) {
-            throw new BadParameterException("BadParameterException");
+            throw new BadParameterException("Description cannot be empty or null");
         }
     }
 }

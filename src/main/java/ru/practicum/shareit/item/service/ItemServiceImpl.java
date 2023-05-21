@@ -64,11 +64,11 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public ItemDto update(ItemDto itemDto, Long id, Long userId) {
         if (userId == null) {
-            throw new BadParameterException("BadParameterException");
+            throw new BadParameterException("User id not set");
         }
         Item item = itemStorage.findById(id).orElseThrow(() -> new ObjectNotFoundException("Item not found"));
         if (!item.getOwner().getId().equals(userId)) {
-            throw new ObjectNotFoundException("User not found");
+            throw new ObjectNotFoundException("User with id= " + userId + " is not the owner");
         }
         String patchName = itemDto.getName();
         if (patchName != null && !patchName.isEmpty()) {
@@ -88,7 +88,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemAllDto get(Long id, Long userId) {
-        Item item = itemStorage.findById(id).orElseThrow(() -> new ObjectNotFoundException("Item not found"));
+        Item item = itemStorage.findById(id).orElseThrow(() -> new ObjectNotFoundException("Item with id= " + id + " not found"));
         List<Comment> comments = commentStorage.findByItem(item, Sort.by(DESC, "created"));
         List<BookingAllDto> bookings = bookingService.getBookingsByItem(item.getId(), userId);
         BookingAllDto lastBooking = getLastItem(bookings);
@@ -99,7 +99,6 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
         return ItemMapper.convertToItemWithAllFields(item, lastBooking, nextBooking, commentDtos);
     }
-
 
     @Override
     @Transactional
@@ -138,7 +137,7 @@ public class ItemServiceImpl implements ItemService {
                     .sorted(Comparator.comparingLong(ItemAllDto::getId))
                     .collect(toList());
         } else {
-            throw new ObjectNotFoundException("User not found");
+            throw new ObjectNotFoundException("User with id= " + id + " not found");
         }
     }
 
@@ -162,13 +161,13 @@ public class ItemServiceImpl implements ItemService {
     @Transactional
     public CommentDto createComment(CommentDto commentDto, Long itemId, Long userId) {
         if (commentDto.getText() == null || commentDto.getText().isBlank()) {
-            throw new BadParameterException("BadParameterException");
+            throw new BadParameterException("Text of the comment cannot be empty");
         }
-        Item item = itemStorage.findById(itemId).orElseThrow(() -> new ObjectNotFoundException("Item not found"));
+        Item item = itemStorage.findById(itemId).orElseThrow(() -> new ObjectNotFoundException("Item with id= " + itemId + "not found"));
         User user = UserMapper.convertDtoToModel(userService.get(userId));
         List<BookingAllDto> bookings = bookingService.getAll(userId, PAST.name());
         if (bookings.isEmpty()) {
-            throw new BadParameterException("BadParameterException");
+            throw new BadParameterException("Can't leave a comment");
         }
 
         Comment comment = CommentMapper.toComment(commentDto);
@@ -235,11 +234,11 @@ public class ItemServiceImpl implements ItemService {
 
     private void checkToValid(ItemDto itemDto) {
         if (itemDto.getAvailable() == null) {
-            throw new BadParameterException("BadParameterException");
+            throw new BadParameterException("Tool availability not defined");
         } else if (itemDto.getName() == null || itemDto.getName().isEmpty()) {
-            throw new BadParameterException("BadParameterException");
+            throw new BadParameterException("Item name cannot be empty");
         } else if (itemDto.getDescription() == null || itemDto.getDescription().isEmpty()) {
-            throw new BadParameterException("BadParameterException");
+            throw new BadParameterException("Item description cannot be empty");
         }
     }
 }

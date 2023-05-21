@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.controller;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemAllDto;
@@ -12,6 +13,7 @@ import ru.practicum.shareit.request.service.ItemRequestService;
 import java.util.List;
 
 @RestController
+@Slf4j
 @RequestMapping("/items")
 @AllArgsConstructor
 public class ItemController {
@@ -23,6 +25,7 @@ public class ItemController {
     @GetMapping("/{itemId}")
     public ItemAllDto get(@RequestHeader(value = HEADER) Long userId,
                           @PathVariable Long itemId) {
+        log.info("ItemController.get(userId:{}, itemId:{})", userId, itemId);
         return itemService.get(itemId, userId);
     }
 
@@ -30,6 +33,7 @@ public class ItemController {
     public List<ItemAllDto> getAllItems(@RequestHeader(value = HEADER) Long userId,
                                         @RequestParam(required = false) Integer from,
                                         @RequestParam(required = false) Integer size) {
+        log.info("ItemController.getAllItems()");
         return itemService.getAll(userId, from, size);
     }
 
@@ -38,6 +42,7 @@ public class ItemController {
                                     @PathVariable Long itemId,
                                     @RequestHeader(value = HEADER, required = false)
                                     Long userId) {
+        log.info("ItemController.createComment(userId:{}, itemId:{})", userId, itemId);
         return itemService.createComment(commentDto, itemId, userId);
     }
 
@@ -45,7 +50,7 @@ public class ItemController {
     public ItemDto save(@RequestHeader(HEADER) Long userId,
                         @RequestBody ItemDto itemDto) {
         ItemRequestDto itemRequestDto = itemDto.getRequestId() != null ? itemRequestService.getItemRequestById(itemDto.getRequestId(), userId) : null;
-
+        log.info("ItemController.save(userId:{})", userId);
         return itemService.save(itemDto, itemRequestDto, userId);
     }
 
@@ -53,6 +58,7 @@ public class ItemController {
     public ItemDto update(@RequestHeader(value = HEADER) Long userId,
                           @RequestBody ItemDto itemDto,
                           @PathVariable Long itemId) {
+        log.info("ItemController.update(userId:{}, itemId:{})", userId, itemId);
         return itemService.update(itemDto, itemId, userId);
     }
 
@@ -61,6 +67,7 @@ public class ItemController {
                                 @RequestParam String text,
                                 @RequestParam(required = false) Integer from,
                                 @RequestParam(required = false) Integer size) {
+        log.info("ItemController.search(userId:{}, text:{})", userId, text);
         return itemService.getByText(text.toLowerCase(), userId, from, size);
     }
 }

@@ -122,7 +122,7 @@ class ItemServiceTest {
     void updateNullOwnerTest() {
         Exception exception = assertThrows(BadParameterException.class,
                 () -> itemService.update(itemDto, null, null));
-        assertEquals("BadParameterException", exception.getMessage());
+        assertEquals("User id not set", exception.getMessage());
     }
 
     @Test
@@ -185,7 +185,7 @@ class ItemServiceTest {
         );
         Exception exception = assertThrows(BadParameterException.class,
                 () -> itemService.createComment(commentDto, itemDto.getId(), 2L));
-        assertEquals("BadParameterException", exception.getMessage());
+        assertEquals("Text of the comment cannot be empty", exception.getMessage());
     }
 
     @Test
@@ -199,7 +199,7 @@ class ItemServiceTest {
         );
         Exception exception = assertThrows(BadParameterException.class,
                 () -> itemService.createComment(commentDto, itemDto.getId(), 2L));
-        assertEquals("BadParameterException", exception.getMessage());
+        assertEquals("Text of the comment cannot be empty", exception.getMessage());
     }
 
     @Test
@@ -215,7 +215,7 @@ class ItemServiceTest {
                         null,
                         1L)
         );
-        assertEquals("BadParameterException", exception.getMessage());
+        assertEquals("Item name cannot be empty", exception.getMessage());
     }
 
     @Test
@@ -244,9 +244,9 @@ class ItemServiceTest {
     @Test
     void saveItemNullDescriptionTest() {
         Exception exception = assertThrows(BadParameterException.class, () -> itemService.save(new ItemDto(null,
-                        "space", null, true, 1L), null, 1L));
+                "space", null, true, 1L), null, 1L));
 
-        assertEquals("BadParameterException", exception.getMessage());
+        assertEquals("Item description cannot be empty", exception.getMessage());
     }
 
     @Test
@@ -262,7 +262,7 @@ class ItemServiceTest {
                         null,
                         1L)
         );
-        assertEquals("BadParameterException", exception.getMessage());
+        assertEquals("Item name cannot be empty", exception.getMessage());
     }
 
     @Test
@@ -278,7 +278,7 @@ class ItemServiceTest {
                         null,
                         1L)
         );
-        assertEquals("BadParameterException", exception.getMessage());
+        assertEquals("Item description cannot be empty", exception.getMessage());
     }
 
     @Test
@@ -294,6 +294,6 @@ class ItemServiceTest {
                         null,
                         1L)
         );
-        assertEquals("BadParameterException", exception.getMessage());
+        assertEquals("Tool availability not defined", exception.getMessage());
     }
 }

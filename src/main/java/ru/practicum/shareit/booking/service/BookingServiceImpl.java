@@ -65,29 +65,15 @@ public class BookingServiceImpl implements BookingService {
                 .collect(Collectors.toList());
     }
 
-    //    @Override
-//    @Transactional
-//    public BookingAllDto approve(Long bookingId, boolean approved, Long userId) {
-//        Booking booking = bookingStorage.findById(bookingId).orElseThrow(
-//                () -> new ObjectNotFoundException("ObjectNotFoundException"));
-//        if (booking.getBooker().getId().equals(userId))
-//            throw new ObjectNotFoundException("ObjectNotFoundException");
-//        if (!booking.getItem().getOwner().getId().equals(userId)
-//                || !booking.getStatus().equals(Status.WAITING))
-//            throw new BadParameterException("ObjectNotFoundException");
-//        booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
-//        Booking savedBooking = bookingStorage.save(booking);
-//        return BookingMapper.mapToBookingAllFieldsDto(savedBooking);
-//    }
     @Override
     @Transactional
     public BookingAllDto approve(Long bookingId, boolean approved, Long userId) {
-        Booking booking = bookingStorage.findById(bookingId).orElseThrow(() -> new ObjectNotFoundException("ObjectNotFoundException"));
+        Booking booking = bookingStorage.findById(bookingId).orElseThrow(() -> new ObjectNotFoundException("This booking does not exist."));
         if (booking.getBooker().getId().equals(userId)) {
-            throw new ObjectNotFoundException("ObjectNotFoundException");
+            throw new ObjectNotFoundException("The user with id= " + userId + " cannot approve");
         }
         if (!booking.getItem().getOwner().getId().equals(userId) || !booking.getStatus().equals(Status.WAITING)) {
-            throw new BadParameterException("ObjectNotFoundException");
+            throw new BadParameterException("Booking cannot be updated");
         }
         booking.setStatus(approved ? Status.APPROVED : Status.REJECTED);
         Booking savedBooking = bookingStorage.save(booking);
@@ -168,9 +154,9 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public BookingAllDto save(BookingControllerDto bookingControllerDto, ItemAllDto itemDto, Long id) {
         if (itemDto.getOwnerId().equals(id))
-            throw new ObjectNotFoundException("ObjectNotFoundException");
+            throw new ObjectNotFoundException("The item with id= " + id + " cannot be rented");
         if (!itemDto.getAvailable())
-            throw new BadParameterException("BadParameterException");
+            throw new BadParameterException("Item with id= " + id + " already rented");
         checkToValid(bookingControllerDto);
         User booker = UserMapper.convertDtoToModel(userService.get(id));
         Item item = ItemMapper.convertDtoToModel(itemDto);
@@ -192,9 +178,9 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingAllDto get(Long bookingId, Long userId) {
-        Booking booking = bookingStorage.findById(bookingId).orElseThrow(() -> new ObjectNotFoundException("ObjectNotFoundException"));
+        Booking booking = bookingStorage.findById(bookingId).orElseThrow(() -> new ObjectNotFoundException("This booking does not exist."));
         if (!booking.getBooker().getId().equals(userId) && !booking.getItem().getOwner().getId().equals(userId)) {
-            throw new ObjectNotFoundException("ObjectNotFoundException");
+            throw new ObjectNotFoundException("This user cannot get booking information");
         }
         return BookingMapper.convertModelToDto(booking);
     }
@@ -293,37 +279,6 @@ public class BookingServiceImpl implements BookingService {
         else
             throw new BadParameterException("Unknown state: " + state);
     }
-
-    //    @Override
-//    public List<BookingAllDto> getBookingsByOwner(Long userId, String state) {
-//        Stream<Booking> stream = null;
-//        User user = UserMapper.convertDtoToModel(userService.get(userId));
-//        if (state == null || ALL.name().equals(state))
-//            stream = bookingStorage.findBookingsByItemOwnerIsOrderByStartDesc(user)
-//                    .stream();
-//        if (PAST.name().equals(state))
-//            stream = bookingStorage
-//                    .findBookingsByItemOwnerAndEndBeforeOrderByStartDesc(user, now())
-//                    .stream();
-//        if (CURRENT.name().equals(state))
-//            stream = bookingStorage
-//                    .findBookingsByItemOwnerIsAndStartBeforeAndEndAfterOrderByStartDesc(user, now(), now())
-//                    .stream();
-//        if (FUTURE.name().equals(state))
-//            stream = bookingStorage
-//                    .findBookingsByItemOwnerAndStartAfterOrderByStartDesc(user, now())
-//                    .stream();
-//        if (Arrays.stream(Status.values()).anyMatch(bookingState -> bookingState.name().equals(state)))
-//            stream = bookingStorage
-//                    .findBookingsByItemOwnerIsAndStatusIsOrderByStartDesc(user, Status.valueOf(state))
-//                    .stream();
-//        if (stream != null)
-//            return stream
-//                    .map(BookingMapper::mapToBookingAllFieldsDto)
-//                    .collect(toList());
-//        else
-//            throw new BadParameterException("Unknown state: " + state);
-//    }
 
     private void checkToValid(BookingControllerDto bookingSavingDto) {
         if (bookingSavingDto.getStart() == null)

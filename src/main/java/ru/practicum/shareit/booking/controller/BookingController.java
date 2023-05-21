@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.controller;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingAllDto;
 import ru.practicum.shareit.booking.dto.BookingControllerDto;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
+@Slf4j
 @RequestMapping("/bookings")
 public class BookingController {
     private final BookingService bookingService;
@@ -22,6 +24,7 @@ public class BookingController {
     public BookingAllDto save(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
                               @RequestBody BookingControllerDto bookingControllerDto) {
         ItemAllDto item = itemService.get(bookingControllerDto.getItemId(), userId);
+        log.info("BookingController.save({})", userId);
         return bookingService.save(bookingControllerDto, item, userId);
     }
 
@@ -29,6 +32,7 @@ public class BookingController {
     public BookingAllDto approve(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
                                  @RequestParam(required = false) boolean approved,
                                  @PathVariable Long bookingId) {
+        log.info("BookingController.approve(userId:{} bookingId:{})", userId, bookingId);
         return bookingService.approve(bookingId, approved, userId);
     }
 
@@ -37,6 +41,7 @@ public class BookingController {
                                                   @RequestParam(required = false) String state,
                                                   @RequestParam(required = false) Integer from,
                                                   @RequestParam(required = false) Integer size) {
+        log.info("BookingController.getBookingsByOwner({})", userId);
         return bookingService.getBookingsByOwner(userId, state, from, size);
     }
 
@@ -45,12 +50,14 @@ public class BookingController {
                                       @RequestParam(required = false) String state,
                                       @RequestParam(required = false) Integer from,
                                       @RequestParam(required = false) Integer size) {
+        log.info("BookingController.getAll()");
         return bookingService.getAll(userId, state, from, size);
     }
 
     @GetMapping("/{bookingId}")
     public BookingAllDto get(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
                              @PathVariable Long bookingId) {
+        log.info("BookingController.get({})", userId);
         return bookingService.get(bookingId, userId);
     }
 }

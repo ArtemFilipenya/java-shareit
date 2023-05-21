@@ -327,7 +327,7 @@ class ItemServiceImplTest {
         final long id = 7L;
         Exception exception = assertThrows(ObjectNotFoundException.class,
                 () -> itemService.get(id, userDto.getId()));
-        assertEquals("Item not found", exception.getMessage());
+        assertEquals("Item with id= 7 not found", exception.getMessage());
     }
 
     @Test

@@ -14,4 +14,6 @@ public interface ItemRequestStorage extends JpaRepository<ItemRequest, Long> {
     List<ItemRequest> findItemRequestByRequester_IdIsNotOrderByCreatedDesc(Long userId);
 
     List<ItemRequest> findItemRequestByRequesterOrderByCreatedDesc(User user);
+
+    ItemRequest findItemRequestById(Long requestId);
 }
