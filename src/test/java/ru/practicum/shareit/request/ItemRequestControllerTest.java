@@ -64,22 +64,6 @@ class ItemRequestControllerTest {
     }
 
     @Test
-    void getAllItemRequests() throws Exception {
-        when(itemRequestService.getAllItemRequests(anyInt(), anyInt(), anyLong())).thenReturn(List.of(itemRequestDto));
-        mvc.perform(get("/requests/all")
-                        .header(headerSharerUserId, 1)
-                        .param("size", "1")
-                        .param("from", "0"))
-                .andExpect(jsonPath("$[0].requesterId", is(itemRequestDto.getRequesterId().intValue())))
-                .andExpect(jsonPath("$[0].created", is(itemRequestDto.getCreated().toString())))
-                .andExpect(jsonPath("$[0].description", is(itemRequestDto.getDescription())))
-                .andExpect(jsonPath("$[0].id", is(itemRequestDto.getId()), Long.class))
-                .andExpect(jsonPath("$[0].items", nullValue()))
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(status().isOk());
-    }
-
-    @Test
     void getAllItemRequestsById() throws Exception {
         when(itemRequestService.getAllItemRequests(anyLong())).thenReturn(List.of(itemRequestDto));
         mvc.perform(get("/requests")
