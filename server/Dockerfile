@@ -1,3 +1,4 @@
-FROM openjdk:11
-COPY target/*.jar server.jar
-ENTRYPOINT ["java","-jar","/server.jar"]
+FROM amazoncorretto:11-alpine-jdk
+COPY ./target/*.jar /app.jar
+EXPOSE 9090
+ENTRYPOINT java -jar /app.jar
