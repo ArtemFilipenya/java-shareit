@@ -1,18 +1,30 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.comments.dto.CommentDto;
 
-@Data
-@Builder
-@AllArgsConstructor
+import java.util.List;
+
+/**
+ * TODO Sprint add-controllers.
+ */
+
 @NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Getter
+@Setter
 public class ItemDto {
-    private Long id;
-    private String name;
-    private String description;
-    private Boolean available;
-    private Long requestId;
+    long id;
+    String name;
+    String description;
+    boolean available;
+    long owner;
+    long requestId;
+    Booking lastBooking;
+    Booking nextBooking;
+    List<CommentDto> comments;
+
 }

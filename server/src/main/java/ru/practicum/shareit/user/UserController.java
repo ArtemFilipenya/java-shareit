@@ -1,42 +1,52 @@
 package ru.practicum.shareit.user;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.exeptions.BadRequestException;
+
 import java.util.List;
 
-
+/**
+ * TODO Sprint add-controllers.
+ */
 @RestController
-@RequestMapping(path = "/users")
-@RequiredArgsConstructor
+@RequestMapping(
+        value = "/users",
+        consumes = MediaType.ALL_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
+@Validated
 public class UserController {
+
     private final UserService userService;
 
-    @PostMapping()
-    public UserDto create(@RequestBody UserDto user) {
-        return userService.save(user);
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
-    @PatchMapping("/{userId}")
-    public UserDto update(@RequestBody UserDto user,
-                          @PathVariable Long userId) {
-        return userService.update(user, userId);
+    @GetMapping
+    public List<User> findAll() {
+        return userService.findAll();
     }
 
-    @GetMapping("/{userId}")
-    public UserDto get(@PathVariable Long userId) {
-        return userService.get(userId);
+    @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public User findUser(@PathVariable("id") Long id) {
+        return userService.findUser(id);
     }
 
-    @DeleteMapping("/{userId}")
-    public void delete(@PathVariable Long userId) {
-        userService.delete(userId);
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public User create(@RequestBody User user) throws BadRequestException {
+        return userService.create(user);
     }
 
-    @GetMapping()
-    public List<UserDto> getAll() {
-        return userService.getAll();
+    @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public User update(@RequestBody User user, @PathVariable("id") Long id) {
+        return userService.update(user, id);
+    }
+
+    @DeleteMapping(value = "/{id}")
+    public void deleteUser(@PathVariable("id") Long id) {
+        userService.deleteUser(id);
     }
 
 }

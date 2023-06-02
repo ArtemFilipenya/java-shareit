@@ -1,56 +1,70 @@
 package ru.practicum.shareit.booking;
 
-import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.MediaType;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.booking.dto.BookingControllerDto;
-import ru.practicum.shareit.booking.dto.BookingAllDto;
-import ru.practicum.shareit.booking.service.BookingService;
-import ru.practicum.shareit.item.dto.ItemAllDto;
-import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.exeptions.BadRequestException;
 
 import java.util.List;
 
-
+/**
+ * TODO Sprint add-bookings.
+ */
+@Validated
 @RestController
-@AllArgsConstructor
-@RequestMapping("/bookings")
+@RequestMapping(value = "/bookings",
+        consumes = MediaType.ALL_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE)
 public class BookingController {
+
     private final BookingService bookingService;
-    private final ItemService itemService;
 
-    @PostMapping()
-    public BookingAllDto save(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
-                              @RequestBody BookingControllerDto bookingControllerDto) {
-        ItemAllDto item = itemService.get(bookingControllerDto.getItemId(), userId);
-        return bookingService.save(bookingControllerDto, item, userId);
+    public BookingController(BookingService bookingService) {
+        this.bookingService = bookingService;
     }
 
-    @PatchMapping("/{bookingId}")
-    public BookingAllDto approve(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
-                                 @RequestParam(required = false) boolean approved,
-                                 @PathVariable Long bookingId) {
-        return bookingService.approve(bookingId, approved, userId);
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public BookingDto create(@RequestBody Booking booking,
+                             @RequestHeader(value = "X-Sharer-User-Id") long ownerId) throws BadRequestException {
+        return bookingService.create(booking, ownerId);
     }
 
-    @GetMapping("/owner")
-    public List<BookingAllDto> getBookingsByOwner(@RequestHeader(required = false, value = "X-Sharer-User-Id") Long userId,
-                                                  @RequestParam(required = false) String state,
-                                                  @RequestParam(required = false) Integer from,
-                                                  @RequestParam(required = false) Integer size) {
-        return bookingService.getBookingsByOwner(userId, state, from, size);
+    @PatchMapping(value = "/{id}")
+    public BookingDto update(@PathVariable("id") long bookingId,
+                             @RequestHeader(value = "X-Sharer-User-Id") long ownerId,
+                             @RequestParam(value = "approved") boolean approved) throws BadRequestException {
+        return bookingService.update(bookingId, approved, ownerId);
+    }
+
+    @GetMapping(value = "/{id}")
+    public BookingDto getBookingById(@PathVariable("id") long bookingId,
+                                     @RequestHeader(value = "X-Sharer-User-Id") long ownerId) throws BadRequestException {
+        BookingDto bookingDto = bookingService.getBookingById(bookingId, ownerId);
+        if (bookingDto == null) {
+            throw new BadRequestException("Wrong id");
+        }
+        return bookingDto;
+    }
+
+    @GetMapping(value = "/owner")
+    public List<BookingDto> findAllWithOwner(@RequestHeader(value = "X-Sharer-User-Id") long ownerId,
+                                             @RequestParam(value = "state", defaultValue = "ALL", required = false)
+                                             String state,
+                                             @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                             @RequestParam(name = "size", defaultValue = "10") Integer size) throws BadRequestException {
+        return bookingService.findAllWithOwner(state, ownerId, PageRequest.of(from / size, size));
     }
 
     @GetMapping()
-    public List<BookingAllDto> getAll(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
-                                      @RequestParam(required = false) String state,
-                                      @RequestParam(required = false) Integer from,
-                                      @RequestParam(required = false) Integer size) {
-        return bookingService.getAll(userId, state, from, size);
-    }
-
-    @GetMapping("/{bookingId}")
-    public BookingAllDto get(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
-                             @PathVariable Long bookingId) {
-        return bookingService.get(bookingId, userId);
+    public List<BookingDto> findAll(@RequestHeader(value = "X-Sharer-User-Id") long ownerId,
+                                    @RequestParam(value = "state", defaultValue = "ALL", required = false)
+                                    String state,
+                                    @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                    @RequestParam(name = "size", defaultValue = "10") Integer size) throws BadRequestException {
+        Integer pageNumber = from;
+        return bookingService.findAll(state, ownerId, PageRequest.of(from / size, size));
     }
 }

@@ -1,44 +1,60 @@
 package ru.practicum.shareit.booking.model;
 
-import lombok.*;
-import ru.practicum.shareit.Enums.Status;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
+import javax.validation.constraints.Future;
+import javax.validation.constraints.FutureOrPresent;
 import java.time.LocalDateTime;
 
-import static javax.persistence.EnumType.STRING;
-import static javax.persistence.GenerationType.IDENTITY;
-
-
-@Entity
-@Getter
-@Setter
-@Builder
-@ToString
+/**
+ * TODO Sprint add-bookings.
+ */
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "bookings")
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Entity
+@Table(name = "bookings", schema = "public")
 public class Booking {
     @Id
-    @GeneratedValue(strategy = IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    long id;
 
-    @Column(name = "start_date", nullable = false)
-    private LocalDateTime start;
+    @Column(name = "booking_start")
+    @FutureOrPresent
+    LocalDateTime start;
 
-    @Column(name = "end_date", nullable = false)
-    private LocalDateTime end;
+    @Future
+    @Column(name = "booking_end")
+    LocalDateTime end;
 
-    @ManyToOne
-    @JoinColumn(name = "item_id", nullable = false)
-    private Item item;
+    @Column(name = "item_id")
+    long itemId;
 
-    @ManyToOne
-    @JoinColumn(name = "booker_id", nullable = false)
-    private User booker;
+    @Transient
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "item_id")
+    @JsonManagedReference
+    @JsonIgnore
+    Item item;
 
-    @Enumerated(STRING)
-    Status status;
+    @Column(name = "booker_id")
+    long bookerId;
+
+    @Transient
+    User user;
+    @Column(name = "booking_status")
+    @Enumerated(EnumType.STRING)
+    BookingStatus status;
+
 }

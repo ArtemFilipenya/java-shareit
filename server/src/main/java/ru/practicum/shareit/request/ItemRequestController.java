@@ -1,39 +1,48 @@
 package ru.practicum.shareit.request;
 
-import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
-import ru.practicum.shareit.request.service.ItemRequestService;
+import ru.practicum.shareit.request.model.ItemRequest;
 
 import java.util.List;
 
+/**
+ * TODO Sprint add-item-requests.
+ */
 @RestController
 @RequestMapping(path = "/requests")
-@AllArgsConstructor
 public class ItemRequestController {
     private final ItemRequestService itemRequestService;
 
-    @GetMapping()
-    public List<ItemRequestDto> getItemRequests(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId) {
-        return itemRequestService.getAllItemRequests(userId);
+    public ItemRequestController(ItemRequestService itemRequestService) {
+        this.itemRequestService = itemRequestService;
     }
 
-    @GetMapping("/all")
-    public List<ItemRequestDto> getAllItemRequests(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
-                                                   @RequestParam(required = false) Integer from,
-                                                   @RequestParam(required = false) Integer size) {
-        return itemRequestService.getAllItemRequests(from, size, userId);
+    @PostMapping
+    public ItemRequest create(@RequestBody ItemRequest itemRequest,
+                              @RequestHeader(value = "X-Sharer-User-Id") long ownerId) {
+
+        return itemRequestService.create(itemRequest, ownerId);
     }
 
-    @PostMapping()
-    public ItemRequestDto createItemRequest(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
-                                            @RequestBody ItemRequestDto itemRequestDto) {
-        return itemRequestService.save(itemRequestDto, userId);
+    @GetMapping(value = "/all")
+    public List<ItemRequestDto> getAllRequests(@RequestHeader(value = "X-Sharer-User-Id") long ownerId,
+                                               @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                               @RequestParam(name = "size", defaultValue = "10") Integer size) {
+        return itemRequestService.getAllRequests(ownerId, PageRequest.of(from, size));
     }
 
-    @GetMapping("/{requestId}")
-    public ItemRequestDto getItemRequest(@RequestHeader(value = "X-Sharer-User-Id", required = false) Long userId,
-                                         @PathVariable Long requestId) {
-        return itemRequestService.getItemRequestById(requestId, userId);
+    @GetMapping
+    public List<ItemRequestDto> getAllRequestsByOwner(@RequestHeader(value = "X-Sharer-User-Id") long ownerId,
+                                                      @RequestParam(name = "from", required = false, defaultValue = "0") Integer from,
+                                                      @RequestParam(name = "size", required = false, defaultValue = "10") Integer size) {
+        return itemRequestService.getAllRequestsByOwner(ownerId, PageRequest.of(from, size));
+    }
+
+    @GetMapping(value = "/{id}")
+    public ItemRequestDto getRequestsById(@RequestHeader(value = "X-Sharer-User-Id") long ownerId,
+                                          @PathVariable("id") Long id) {
+        return itemRequestService.getRequestsById(ownerId, id);
     }
 }

@@ -1,33 +1,45 @@
 package ru.practicum.shareit.request.model;
 
-import lombok.*;
-import ru.practicum.shareit.user.model.User;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.User;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.List;
 
-import static javax.persistence.GenerationType.IDENTITY;
-
-@Entity
-@Getter
-@Setter
-@ToString
-@Builder
+/**
+ * TODO Sprint add-item-requests.
+ */
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "requests")
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Entity
+@Table(name = "item_request", schema = "public")
 public class ItemRequest {
     @Id
-    @GeneratedValue(strategy = IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    long id;
 
-    @Column(nullable = false)
-    private String description;
+    @NotNull
+    @Size(max = 256)
+    String description;
 
-    @ManyToOne
-    @JoinColumn(name = "requester_id", nullable = false)
-    private User requester;
+    long requestor;
 
-    @Column(name = "created", nullable = false)
-    private LocalDateTime created;
+    LocalDateTime created;
+
+    @Transient
+    User user;
+
+    @Transient
+    List<Item> items;
+
 }

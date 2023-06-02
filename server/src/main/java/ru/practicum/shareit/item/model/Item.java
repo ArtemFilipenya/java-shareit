@@ -1,39 +1,54 @@
 package ru.practicum.shareit.item.model;
 
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.request.model.ItemRequest;
-import ru.practicum.shareit.user.model.User;
+import lombok.experimental.FieldDefaults;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.comments.dto.CommentDto;
 
 import javax.persistence.*;
+import javax.validation.constraints.Size;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-@Entity
-@Table(name = "Items")
+/**
+ * TODO Sprint add-controllers.
+ */
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Entity
+@Table(name = "items", schema = "public")
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    long id;
 
-    @Column(nullable = false)
-    private String name;
+    @Size(max = 20)
+    String name;
 
-    @Column(nullable = false)
-    private String description;
+    @Size(max = 200)
+    String description;
 
-    @Column(nullable = false)
-    private Boolean available;
+    boolean available;
+    Long owner;
 
-    @ManyToOne
-    @JoinColumn(name = "owner_id", nullable = false)
-    private User owner;
+    @Column(name = "request_id")
+    Long requestId;
+    @Transient
+    Booking lastBooking;
 
-    @ManyToOne
-    @JoinColumn(name = "request_id")
-    private ItemRequest request;
+    @Transient
+    Booking nextBooking;
+
+    @Transient
+    List<CommentDto> comments;
+
+    @Transient
+    Set<Booking> bookings = new HashSet<>();
+
 }
