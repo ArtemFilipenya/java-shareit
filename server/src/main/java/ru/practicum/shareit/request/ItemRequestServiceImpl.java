@@ -8,6 +8,7 @@ import ru.practicum.shareit.exeptions.ObjectNotFoundException;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
+import ru.practicum.shareit.request.dto.SimpleItemRequestDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserService;
@@ -32,14 +33,14 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public ItemRequest create(ItemRequest itemRequest, long ownerId) {
+    public SimpleItemRequestDto create(SimpleItemRequestDto itemRequestDto, long ownerId) {
         User checkUser = userService.findUser(ownerId);
+        ItemRequest itemRequest = ItemRequestMapper.fromSimpleDto(itemRequestDto);
         itemRequest.setRequestor(ownerId);
         itemRequest.setCreated(LocalDateTime.now());
         ItemRequest createdItemRequest = repository.save(itemRequest);
-        return createdItemRequest;
+        return ItemRequestMapper.toSimpleDto(createdItemRequest);
     }
-
 
     @Override
     public List<ItemRequestDto> getAllRequestsByOwner(long ownerId, PageRequest pageRequest) {

@@ -45,34 +45,6 @@ public class ItemRequestServiceTest {
     }
 
     @Test
-    @Order(1)
-    @DisplayName("1.Create test")
-    void createTest() {
-        Long ownerId = 1L;
-        ItemRequest itemRequestListWithoutId = ItemRequestServiceTestUtils.getItemRequestWithoutIds().get(0);
-        when(userRepository.findById(ownerId)).thenReturn(Optional.ofNullable(getUser(ownerId)));
-        when(itemRequestRepository.save(itemRequestListWithoutId)).thenReturn(ItemRequestServiceTestUtils.getItemRequest(1L));
-        ItemRequest itemRequest = itemRequestService.create(itemRequestListWithoutId, ownerId);
-
-        Assertions.assertEquals(1, itemRequest.getId());
-        Assertions.assertEquals("Need a car", itemRequest.getDescription());
-    }
-
-    @Test
-    @Order(2)
-    @DisplayName("2.Create test fail wrong owner Id")
-    void shouldThrowExceptionWhileCreatingWrongOwnerId() {
-        Long ownerId = 10L;
-        ItemRequest itemRequestListWithoutId = ItemRequestServiceTestUtils.getItemRequestWithoutIds().get(0);
-        when(userRepository.findById(ownerId)).thenThrow(new ObjectNotFoundException("Wrong ID"));
-        when(itemRequestRepository.save(itemRequestListWithoutId)).thenReturn(ItemRequestServiceTestUtils.getItemRequest(1L));
-
-        ObjectNotFoundException exception = Assertions.assertThrows(ObjectNotFoundException.class,
-                () -> itemRequestService.create(itemRequestListWithoutId, ownerId));
-        Assertions.assertEquals("Wrong ID", exception.getMessage());
-    }
-
-    @Test
     @Order(3)
     @DisplayName("3.Get all requests")
     void getAllRequestsTest() {

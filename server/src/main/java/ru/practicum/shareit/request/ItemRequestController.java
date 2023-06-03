@@ -3,7 +3,7 @@ package ru.practicum.shareit.request;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
-import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.dto.SimpleItemRequestDto;
 
 import java.util.List;
 
@@ -17,14 +17,13 @@ public class ItemRequestController {
     }
 
     @PostMapping
-    public ItemRequestDto create(@RequestBody ItemRequestDto itemRequestDto,
-                                 @RequestHeader(value = "X-Sharer-User-Id") long ownerId) {
-        ItemRequest itemRequest = ItemRequestMapper.fromDto(itemRequestDto);
-        ItemRequest createdItemRequest = itemRequestService.create(itemRequest, ownerId);
-        return ItemRequestMapper.toItemRequestDto(createdItemRequest);
+    public SimpleItemRequestDto create(@RequestBody SimpleItemRequestDto itemRequestDto,
+                                       @RequestHeader(value = "X-Sharer-User-Id") long ownerId) {
+        SimpleItemRequestDto createdItemRequestDto = itemRequestService.create(itemRequestDto, ownerId);
+        return createdItemRequestDto;
     }
 
-    @GetMapping(value = "/all")
+        @GetMapping(value = "/all")
     public List<ItemRequestDto> getAllRequests(@RequestHeader(value = "X-Sharer-User-Id") long ownerId,
                                                @RequestParam(name = "from", defaultValue = "0") Integer from,
                                                @RequestParam(name = "size", defaultValue = "10") Integer size) {
@@ -33,8 +32,8 @@ public class ItemRequestController {
 
     @GetMapping
     public List<ItemRequestDto> getAllRequestsByOwner(@RequestHeader(value = "X-Sharer-User-Id") long ownerId,
-                                                      @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                                      @RequestParam(name = "size", defaultValue = "10") Integer size) {
+                                                            @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                                            @RequestParam(name = "size", defaultValue = "10") Integer size) {
         return itemRequestService.getAllRequestsByOwner(ownerId, PageRequest.of(from, size));
     }
 
