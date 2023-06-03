@@ -8,11 +8,11 @@ import javax.validation.constraints.NotNull;
 @Data
 public class UserRequestDto {
 
-    long id;
+    private long id;
     @NotNull(groups = {Create.class}, message = "Name cannot be empty")
-    String name;
+    private String name;
     @Email(groups = {Update.class, Create.class}, message = "Email cannot be empty")
     @NotNull(groups = {Create.class}, message = "Email cannot be empty")
-    String email;
+    private String email;
 
 }

@@ -3,7 +3,6 @@ package ru.practicum.shareit.booking;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
@@ -51,9 +50,6 @@ public class BookingClient extends BaseClient {
     }
 
     public ResponseEntity<Object> create(BookItemRequestDto requestDto, long userId) {
-        if (requestDto.getStart().equals(requestDto.getEnd())) {
-            return new ResponseEntity<>("Wrong request", HttpStatus.BAD_REQUEST);
-        }
         return post("", userId, requestDto);
     }
 
@@ -64,6 +60,4 @@ public class BookingClient extends BaseClient {
     public ResponseEntity<Object> update(long bookingId, boolean approved, long ownerId) {
         return patch("/" + bookingId + "?approved=" + approved, ownerId);
     }
-
-
 }

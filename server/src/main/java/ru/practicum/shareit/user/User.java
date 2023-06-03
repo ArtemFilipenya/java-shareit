@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
 
 /**
  * TODO Sprint add-controllers.
@@ -25,6 +24,6 @@ public class User {
 
     String name;
 
-    @Email String email;
+    String email;
 
 }

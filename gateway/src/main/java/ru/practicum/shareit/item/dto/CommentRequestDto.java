@@ -12,8 +12,8 @@ import javax.validation.constraints.Size;
 @AllArgsConstructor
 public class CommentRequestDto {
 
-    long id;
+    private long id;
     @Size(max = 256, message = "max length 256")
     @NotBlank(message = "text cannot be empty")
-    String text;
+    private String text;
 }

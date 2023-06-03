@@ -4,19 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
-import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ItemRequestRequestDto {
-    long id;
-
-    @Size(max = 256)
-    String description;
-
-    long requestor;
-    LocalDateTime created;
-
+    private long id;
+    @Size(max = 256, message = "max length 256")
+    @NotBlank(message = "description cannot be empty")
+    private String description;
 }

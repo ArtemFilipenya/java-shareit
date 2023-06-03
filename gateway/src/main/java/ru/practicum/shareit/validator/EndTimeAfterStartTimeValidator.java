@@ -14,7 +14,7 @@ public class EndTimeAfterStartTimeValidator implements ConstraintValidator<EndTi
 
     @Override
     public boolean isValid(BookItemRequestDto requestDto, ConstraintValidatorContext context) {
-        return requestDto.getStart() == null || requestDto.getEnd() == null || !requestDto.getStart().isAfter(requestDto.getEnd());
+        return requestDto.getStart() == null || requestDto.getEnd() == null || requestDto.getStart().isBefore(requestDto.getEnd());
     }
 }
 

@@ -9,7 +9,6 @@ import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.comments.dto.CommentDto;
 
 import javax.persistence.*;
-import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,10 +27,10 @@ public class Item {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long id;
 
-    @Size(max = 20)
+    //@Size(max = 20)
     String name;
 
-    @Size(max = 200)
+    //@Size(max = 200)
     String description;
 
     boolean available;

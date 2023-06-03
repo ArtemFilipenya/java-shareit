@@ -2,8 +2,8 @@ package ru.practicum.shareit.ServiceTest.UserTest;
 
 import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
-import ru.practicum.shareit.exeptions.ObjectNotFoundException;
 import ru.practicum.shareit.exeptions.BadRequestException;
+import ru.practicum.shareit.exeptions.ObjectNotFoundException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.UserServiceImpl;

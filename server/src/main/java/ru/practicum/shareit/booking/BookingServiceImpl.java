@@ -7,8 +7,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.exeptions.ObjectNotFoundException;
 import ru.practicum.shareit.exeptions.BadRequestException;
+import ru.practicum.shareit.exeptions.ObjectNotFoundException;
 import ru.practicum.shareit.item.ItemService;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
@@ -90,7 +90,7 @@ public class BookingServiceImpl implements BookingService {
                 listForReturn.add(bookingDto);
             }
         }
-       return getListFromPage(pageRequest, listForReturn);
+        return getListFromPage(pageRequest, listForReturn);
     }
 
     @Override
@@ -162,7 +162,7 @@ public class BookingServiceImpl implements BookingService {
 
     private List<BookingDto> getListFromPage(PageRequest pageRequest, List<BookingDto> listForReturn) {
         final int start = (int) pageRequest.getOffset();
-        final int end = Math.min((start +  pageRequest.getPageSize()), listForReturn.size());
+        final int end = Math.min((start + pageRequest.getPageSize()), listForReturn.size());
         Page<BookingDto> page = new PageImpl<>(listForReturn.subList(start, end), pageRequest, listForReturn.size());
         return page.getContent();
     }

@@ -6,14 +6,17 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exeptions.ObjectNotFoundException;
 import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserService;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -33,8 +36,10 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         User checkUser = userService.findUser(ownerId);
         itemRequest.setRequestor(ownerId);
         itemRequest.setCreated(LocalDateTime.now());
-        return repository.save(itemRequest);
+        ItemRequest createdItemRequest = repository.save(itemRequest);
+        return createdItemRequest;
     }
+
 
     @Override
     public List<ItemRequestDto> getAllRequestsByOwner(long ownerId, PageRequest pageRequest) {
@@ -60,11 +65,26 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     private List<ItemRequestDto> getItemRequestDtos(Page<ItemRequest> page) {
         List<ItemRequest> list = page.getContent();
-        List<ItemRequestDto> dtoList = new ArrayList<>();
-        for (ItemRequest itemRequest : list) {
-            itemRequest.setItems(itemRepository.findAllByRequestId(itemRequest.getId()));
-            dtoList.add(ItemRequestMapper.toItemRequestDto(itemRequest));
-        }
+
+        // Собираем все id запросов
+        List<Long> requestIds = list.stream()
+                .map(ItemRequest::getId)
+                .collect(Collectors.toList());
+
+        // Загружаем все связанные элементы по id запросов
+        Map<Long, List<Item>> itemsByRequestId = itemRepository.findAllByRequestIdIn(requestIds)
+                .stream()
+                .collect(Collectors.groupingBy(Item::getRequestId));
+
+        // Создаем список ItemRequestDto и связываем элементы с соответствующими ItemRequest
+        List<ItemRequestDto> dtoList = list.stream()
+                .map(itemRequest -> {
+                    List<Item> items = itemsByRequestId.getOrDefault(itemRequest.getId(), Collections.emptyList());
+                    itemRequest.setItems(items);
+                    return ItemRequestMapper.toItemRequestDto(itemRequest);
+                })
+                .collect(Collectors.toList());
+
         return dtoList;
     }
 }

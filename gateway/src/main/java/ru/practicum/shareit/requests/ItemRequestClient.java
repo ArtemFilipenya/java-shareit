@@ -29,9 +29,6 @@ public class ItemRequestClient extends BaseClient {
     }
 
     public ResponseEntity<Object> create(ItemRequestRequestDto itemRequestDto, long ownerId) {
-        if (itemRequestDto.getDescription() == null) {
-            return new ResponseEntity<>("Wrong request", HttpStatus.BAD_REQUEST);
-        }
         return post("", ownerId, itemRequestDto);
     }
 
@@ -63,5 +60,4 @@ public class ItemRequestClient extends BaseClient {
                 "size", size);
         return get("/all?from={from}&size={size}", ownerId, parameters);
     }
-
 }

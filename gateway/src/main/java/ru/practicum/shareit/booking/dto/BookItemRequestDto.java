@@ -12,10 +12,10 @@ import java.time.LocalDateTime;
 @EndTimeAfterStartTime
 public class BookItemRequestDto {
     private long itemId;
-    @FutureOrPresent
+    @FutureOrPresent(message = "FutureOrPresent")
     @NotNull(message = "start cannot be null")
     private LocalDateTime start;
-    @Future
+    @Future(message = "Future")
     @NotNull(message = "end cannot be null")
     private LocalDateTime end;
 }

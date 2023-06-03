@@ -39,13 +39,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(MockitoExtension.class)
 public class ItemControllerTest {
+    private final ObjectMapper mapper = new ObjectMapper();
     @Mock
     private ItemService itemService;
-
     @InjectMocks
     private ItemController itemController;
-
-    private final ObjectMapper mapper = new ObjectMapper();
     private MockMvc mvc;
     private User user;
     private Item item;

@@ -2,8 +2,8 @@ package ru.practicum.shareit.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exeptions.ObjectNotFoundException;
 import ru.practicum.shareit.exeptions.BadRequestException;
+import ru.practicum.shareit.exeptions.ObjectNotFoundException;
 
 import java.util.List;
 

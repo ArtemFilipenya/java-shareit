@@ -59,9 +59,6 @@ public class ItemController {
     public ResponseEntity<Object> addComment(@Valid @RequestBody CommentRequestDto commentDto,
                                              @PathVariable long id,
                                              @RequestHeader(OWNER_ID_HEADER) long ownerId) {
-        if (commentDto.getText().isBlank()) {
-            return ResponseEntity.badRequest().body("Empty comment");
-        }
         return itemClient.addComment(commentDto, id, ownerId);
 
     }
