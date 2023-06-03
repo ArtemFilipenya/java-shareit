@@ -10,7 +10,6 @@ import ru.practicum.shareit.booking.dto.BookItemRequestDto;
 import ru.practicum.shareit.booking.dto.BookingState;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 
@@ -45,21 +44,21 @@ public class BookingController {
     }
 
     @PostMapping
-    public ResponseEntity<Object> create(@RequestHeader("X-Sharer-User-Id") @NotNull long userId,
+    public ResponseEntity<Object> create(@RequestHeader("X-Sharer-User-Id") long userId,
                                          @RequestBody @Valid BookItemRequestDto requestDto) {
         log.info("Creating booking {}, userId={}", requestDto, userId);
         return bookingClient.create(requestDto, userId);
     }
 
     @GetMapping("/{bookingId}")
-    public ResponseEntity<Object> getBookingById(@RequestHeader("X-Sharer-User-Id") @NotNull long userId,
+    public ResponseEntity<Object> getBookingById(@RequestHeader("X-Sharer-User-Id") long userId,
                                                  @PathVariable Long bookingId) {
         log.info("Get booking {}, userId={}", bookingId, userId);
         return bookingClient.getBooking(bookingId, userId);
     }
 
     @PatchMapping(value = "/{id}")
-    public ResponseEntity<Object> update(@PathVariable("id") @NotNull long bookingId,
+    public ResponseEntity<Object> update(@PathVariable("id") long bookingId,
                                          @RequestHeader(value = "X-Sharer-User-Id") long ownerId,
                                          @RequestParam(value = "approved") boolean approved) {
         log.info("Update booking with id{}, userId={}", bookingId, ownerId);

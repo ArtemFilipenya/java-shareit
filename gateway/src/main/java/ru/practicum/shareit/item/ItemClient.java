@@ -1,12 +1,12 @@
 package ru.practicum.shareit.item;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.stereotype.Service;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import ru.practicum.shareit.client.BaseClient;
 import ru.practicum.shareit.item.dto.CommentRequestDto;
@@ -29,7 +29,7 @@ public class ItemClient extends BaseClient {
     }
 
     public ResponseEntity<Object> create(ItemRequestDto itemDto, long ownerId) {
-        if (!itemDto.isAvailable() || itemDto.getName().isEmpty() || itemDto.getDescription() == null) {
+        if (!itemDto.isAvailable()) {
             return new ResponseEntity<>("Wrong request", HttpStatus.BAD_REQUEST);
         }
         return post("", ownerId, itemDto);
@@ -54,9 +54,6 @@ public class ItemClient extends BaseClient {
     }
 
     public ResponseEntity<Object> addComment(CommentRequestDto commentDto, long id, long ownerId) {
-        if (commentDto.getText().isEmpty()) {
-            return new ResponseEntity<>("Wrong request", HttpStatus.BAD_REQUEST);
-        }
         return post("/" + id + "/comment", ownerId, commentDto);
     }
 }

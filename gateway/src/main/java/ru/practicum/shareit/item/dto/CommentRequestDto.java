@@ -4,9 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
-import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor
@@ -14,16 +13,7 @@ import java.time.LocalDateTime;
 public class CommentRequestDto {
 
     long id;
-
-    @Size(max = 256)
+    @Size(max = 256, message = "max length 256")
+    @NotBlank(message = "text cannot be empty")
     String text;
-
-    @NotNull
-    long itemId;
-
-    @NotNull
-    long authorId;
-
-    LocalDateTime created;
 }
-

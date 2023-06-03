@@ -51,7 +51,7 @@ public class BookingClient extends BaseClient {
     }
 
     public ResponseEntity<Object> create(BookItemRequestDto requestDto, long userId) {
-        if (requestDto.getStart() == null || requestDto.getEnd() == null || requestDto.getStart().equals(requestDto.getEnd())) {
+        if (requestDto.getStart().equals(requestDto.getEnd())) {
             return new ResponseEntity<>("Wrong request", HttpStatus.BAD_REQUEST);
         }
         return post("", userId, requestDto);

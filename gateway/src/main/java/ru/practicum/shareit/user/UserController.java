@@ -6,10 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.user.dto.Create;
+import ru.practicum.shareit.user.dto.Update;
 import ru.practicum.shareit.user.dto.UserRequestDto;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 @Controller
 @RequestMapping(path = "/users")
@@ -25,24 +24,22 @@ public class UserController {
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<Object> findUser(@PathVariable("id") @NotNull Long id) {
+    public ResponseEntity<Object> findUser(@PathVariable("id") Long id) {
         return userClient.getUser(id);
     }
 
     @PostMapping
-    public ResponseEntity<Object> create(@RequestBody @Valid UserRequestDto user) {
+    public ResponseEntity<Object> create(@RequestBody @Validated(Create.class) UserRequestDto user) {
         return userClient.saveUser(user);
     }
 
     @PatchMapping(value = "/{id}")
-    public ResponseEntity<Object> update(@RequestBody @Valid UserRequestDto user, @PathVariable("id") @NotNull Long id) {
+    public ResponseEntity<Object> update(@RequestBody @Validated(Update.class) UserRequestDto user, @PathVariable("id") Long id) {
         return userClient.update(user, id);
     }
 
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Object> deleteUser(@PathVariable("id") @NotNull Long id) {
+    public ResponseEntity<Object> deleteUser(@PathVariable("id") Long id) {
         return userClient.deleteUser(id);
     }
-
-
 }
