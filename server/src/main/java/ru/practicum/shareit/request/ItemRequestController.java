@@ -23,7 +23,7 @@ public class ItemRequestController {
         return createdItemRequestDto;
     }
 
-        @GetMapping(value = "/all")
+    @GetMapping(value = "/all")
     public List<ItemRequestDto> getAllRequests(@RequestHeader(value = "X-Sharer-User-Id") long ownerId,
                                                @RequestParam(name = "from", defaultValue = "0") Integer from,
                                                @RequestParam(name = "size", defaultValue = "10") Integer size) {
@@ -32,8 +32,8 @@ public class ItemRequestController {
 
     @GetMapping
     public List<ItemRequestDto> getAllRequestsByOwner(@RequestHeader(value = "X-Sharer-User-Id") long ownerId,
-                                                            @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                                            @RequestParam(name = "size", defaultValue = "10") Integer size) {
+                                                      @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                                      @RequestParam(name = "size", defaultValue = "10") Integer size) {
         return itemRequestService.getAllRequestsByOwner(ownerId, PageRequest.of(from, size));
     }
 
